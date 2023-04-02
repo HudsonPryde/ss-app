@@ -168,7 +168,6 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   card: {
-    // borderWidth: 2,
     padding: 5,
     borderRadius: 25,
     width: "100%",
