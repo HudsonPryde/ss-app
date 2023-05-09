@@ -1,4 +1,5 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import * as SecureStorage from "expo-secure-store";
 import { Camera, CameraType } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
@@ -12,6 +13,7 @@ import {
   PanResponder,
   Dimensions,
 } from "react-native";
+import { Dark } from "../lib/Theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 const { uploadPhoto } = require("../lib/api/imageProcess.js");
 const { createNotes } = require("../lib/api/textProcess.js");
@@ -51,6 +53,7 @@ async function handleCreateNotes(text) {
 }
 
 const CameraScreen = ({ navigation }) => {
+  const [user, setUser] = useState(null);
   const cameraRef = useRef(null);
   const screenH = Dimensions.get("screen").height;
   const screenW = Dimensions.get("screen").width;
@@ -73,6 +76,17 @@ const CameraScreen = ({ navigation }) => {
   const [width, setWidth] = useState(300);
   const [height, setHeight] = useState(screenH / 2);
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
+
+  React.useEffect(() => {
+    const getUser = async () => {
+      await SecureStorage.getItemAsync("supabase.auth.user").then(
+        async (res) => {
+          setUser(JSON.parse(res));
+        }
+      );
+    };
+    getUser();
+  }, []);
 
   const panResponder = PanResponder.create({
     onStartShouldSetPanResponder: () => true,
@@ -141,148 +155,91 @@ const CameraScreen = ({ navigation }) => {
           {...panResponder.panHandlers}
         ></View>
       </SafeAreaView>
-      <SafeAreaView style={styles.container}>
-        {/* CAMERA BUTTON */}
+      <View style={styles.row}>
+        {/* Flash light toggle */}
         <TouchableOpacity
-          style={{
-            alignSelf: "center",
-            // marginBottom: 25,
-          }}
-          onPress={async () => {
-            if (cameraRef.current) {
-              let photo = await cameraRef.current.takePictureAsync();
-              const imgText = await handleImage(
-                photo,
-                height,
-                width,
-                frameLayout.x,
-                frameLayout.y + headerLayout.height,
-                screenH,
-                screenW
-              );
-              // handleCreateNotes(imgText);
+          onPress={() => {
+            if (flashMode === Camera.Constants.FlashMode.off) {
+              setFlashMode(Camera.Constants.FlashMode.torch);
+            } else {
+              setFlashMode(Camera.Constants.FlashMode.off);
             }
           }}
         >
           <MaterialIcon
+            name={
+              flashMode == Camera.Constants.FlashMode.off
+                ? "flash-off"
+                : "flash-on"
+            }
+            size={35}
+            style={{ color: Dark.primary }}
+          />
+        </TouchableOpacity>
+        {/* CAMERA BUTTON */}
+        <TouchableOpacity
+          style={{ paddingHorizontal: 25 }}
+          // commented out for testing
+          // onPress={async () => {
+          //   if (cameraRef.current) {
+          //     let photo = await cameraRef.current.takePictureAsync();
+          //     const imgText = await handleImage(
+          //       photo,
+          //       height,
+          //       width,
+          //       frameLayout.x,
+          //       frameLayout.y + headerLayout.height,
+          //       screenH,
+          //       screenW
+          //     );
+          //     // handleCreateNotes(imgText);
+          //   }
+          // }}
+          // bypass picture taking for testing notes screen
+          onPress={() => {
+            navigation.navigate("Notes", { user: user });
+          }}
+        >
+          <MaterialIcon
             name={"radio-button-unchecked"}
-            size={95}
-            style={{ color: "#f2f2f2" }}
+            size={85}
+            style={{ color: Dark.primary }}
           />
         </TouchableOpacity>
 
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "stretch",
-            justifyContent: "space-around",
-            width: "100%",
-            paddingHorizontal: 20,
+        {/* Media Library icon */}
+        <TouchableOpacity
+          onPress={async () => {
+            res = await ImagePicker.launchImageLibraryAsync({
+              allowsEditing: true,
+              allowsMultipleSelection: false,
+              quality: 1,
+            });
+            if (!res.canceled) {
+              const img = res.assets[0];
+              uploadPhoto(img);
+              // after successful upload navigate to notes screen
+            }
           }}
         >
-          {/* NOTEBOOK ICON BUTTON */}
-          <TouchableOpacity
-            style={{
-              flex: 0,
-              // marginTop: 25,
-              // marginLeft: 25,
-            }}
-            onPress={() => navigation.navigate("Notebook")}
-          >
-            <MaterialIcon
-              name={"book"}
-              size={45}
-              style={{ color: "#f2f2f2" }}
-            />
-          </TouchableOpacity>
-          {/* Flash light toggle */}
-          <TouchableOpacity
-            style={{
-              flex: 0,
-              // marginTop: 25,
-              // marginLeft: 25,
-            }}
-            onPress={() => {
-              if (flashMode === Camera.Constants.FlashMode.off) {
-                setFlashMode(Camera.Constants.FlashMode.torch);
-              } else {
-                setFlashMode(Camera.Constants.FlashMode.off);
-              }
-            }}
-          >
-            <MaterialIcon
-              name={
-                flashMode == Camera.Constants.FlashMode.off
-                  ? "flash-off"
-                  : "flash-on"
-              }
-              size={45}
-              style={{ color: "#f2f2f2" }}
-            />
-          </TouchableOpacity>
-
-          {/* Media Library icon */}
-          <TouchableOpacity
-            style={{
-              flex: 0,
-              // marginTop: 25,
-              // marginRight: 25,
-            }}
-            onPress={async () => {
-              res = await ImagePicker.launchImageLibraryAsync({
-                allowsEditing: true,
-                allowsMultipleSelection: false,
-                quality: 1,
-              });
-              if (!res.canceled) {
-                const img = res.assets[0];
-                uploadPhoto(img);
-                // after successful upload navigate to notes screen
-              }
-            }}
-          >
-            <MaterialIcon
-              name={"add-photo-alternate"}
-              size={45}
-              style={{ color: "#f2f2f2" }}
-            />
-          </TouchableOpacity>
-
-          {/* Profile icon */}
-          <TouchableOpacity
-            style={{
-              flex: 0,
-              // marginTop: 25,
-              // marginRight: 25,
-            }}
-            onPress={() => navigation.navigate("Login")}
-          >
-            <MaterialIcon
-              name={"account-circle"}
-              size={45}
-              style={{ color: "#f2f2f2" }}
-            />
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
+          <MaterialIcon
+            name={"add-photo-alternate"}
+            size={35}
+            style={{ color: Dark.primary }}
+          />
+        </TouchableOpacity>
+      </View>
     </Camera>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-  },
   row: {
+    flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "center",
     width: "100%",
-    paddingHorizontal: 20,
   },
 });
 

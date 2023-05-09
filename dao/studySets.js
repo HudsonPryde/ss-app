@@ -1,14 +1,22 @@
 import { supabase } from "../lib/initSupabase.js";
 
-export const createStudySet = async (user_id, name) => {
-  const { error } = await supabase
+/*
+description: create a new notebook
+props: 
+  - user_id: id of the user creating the notebook
+  - name: name of the notebook
+  - colour?: colour of the notebook (optinal)
+*/
+export const createStudySet = async (user_id, name, colour) => {
+  const { data, error } = await supabase
     .from("Notebooks")
-    .insert({ user_id: user_id, name: name });
-
+    .insert({ user_id: user_id, name: name, colour: colour })
+    .select();
   if (error) {
     console.error(error);
     return error;
   }
+  return data[0];
 };
 
 // return an object containing all user study sets
@@ -21,21 +29,19 @@ export const getStudySets = async (user_id) => {
     console.error(error);
     return error;
   }
-  console.log(await supabase.auth.getSession());
-  console.log(Notebooks);
   return Notebooks;
 };
 
 /*
-description: return all notes for a given list of sections
-props:
- - section_ids: array of section ids
+description: retrieve a notebook by its id
+props: 
+ - notebook_id: id of the notebook to retrieve
 */
-export const getSectionNotes = async (section_ids) => {
+export const getStudySet = async (notebook_id) => {
   const { data, error } = await supabase
-    .from("Notes")
-    .select()
-    .in("section_id", section_ids);
+    .from("Notebooks")
+    .select("*")
+    .eq("id", notebook_id);
   if (error) {
     console.error(error);
     return error;
@@ -43,40 +49,12 @@ export const getSectionNotes = async (section_ids) => {
   return data;
 };
 
-// add a note to a specific set
-export const createSetNote = async (
-  notebook_id,
-  text,
-  question,
-  answer,
-  hint
-) => {
-  const { error } = await supabase.from("Notes").insert({
-    notebook_id: notebook_id,
-    text: text,
-    question: question,
-    answer: answer,
-    hint: hint,
-  });
-  if (error) {
-    console.error(error);
-    return error;
-  }
-};
-
-export const removeNotes = async (notebook_id) => {
-  const { error } = await supabase
-    .from("Notes")
-    .delete()
-    .eq("notebook_id", notebook_id);
-  if (error) {
-    console.error(error);
-    return error;
-  }
-};
-
+/*
+description: remove a notebook by its id
+props: 
+ - notebook_id: id of the notebook to remove
+*/
 export const removeStudySet = async (notebook_id) => {
-  await removeNotes(notebook_id);
   const { error } = await supabase
     .from("Notebooks")
     .delete()
@@ -87,13 +65,38 @@ export const removeStudySet = async (notebook_id) => {
   }
 };
 
-export const removeSingleNote = async (note_id) => {
-  const { error } = await supabase
-    .from("Notes")
-    .delete()
-    .eq("note_id", note_id);
+/*
+description: update a notebook by its id using the options provided
+props: 
+ - notebook_id: id of the notebook to remove
+ - options: object containing the fields to update
+*/
+export const updateStudySet = async (notebook_id, options) => {
+  const { data, error } = await supabase
+    .from("Notebooks")
+    .update(options)
+    .eq("id", notebook_id)
+    .select();
   if (error) {
     console.error(error);
     return error;
   }
+  return data;
+};
+
+/*
+description: count the sections belonging to a notebook
+props:
+  - notebook_id: id of the notebook to count the sections of
+*/
+export const countSections = async (notebook_id) => {
+  const { data, error } = await supabase
+    .from("Sections")
+    .select("id")
+    .eq("notebook_id", notebook_id);
+  if (error) {
+    console.error(error);
+    return error;
+  }
+  return data.length;
 };

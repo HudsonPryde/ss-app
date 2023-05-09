@@ -1,229 +1,261 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
+import { Dark } from "../lib/Theme";
 import {
-  TouchableOpacity,
   StyleSheet,
   Text,
   View,
   ScrollView,
-  Modal,
-  TextInput,
-  Dimensions,
+  Animated,
   Pressable,
   ActivityIndicator,
+  UIManager,
+  LayoutAnimation,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { BlurView } from "expo-blur";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { createStudySet, getStudySets } from "../dao/studySets";
+import { getStudySets } from "../dao/studySets";
 import Notebook from "../components/Notebook";
+import NotebookOptions from "../components/modals/NotebookOptions";
+import NewNotebookModal from "../components/modals/NewNotebookModal";
+import { supabase } from "../lib/initSupabase";
+import * as SecureStorage from "expo-secure-store";
+
+if (
+  Platform.OS === "android" &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 const MainScreen = ({ navigation }) => {
-  const searchRef = React.createRef(null);
-  const screenW = Dimensions.get("screen").width;
-  const screenH = Dimensions.get("screen").height;
   const [studySets, setStudySets] = useState([]);
-  const [showNewSetModal, setNewSetModal] = useState(false);
-  const [createSetButtonDisable, setCreateSetButtonDisable] = useState(true);
-  const [newStudySetName, setNewStudySetName] = useState("");
+  const [user, setUser] = useState(null);
+  const [showNotebookOptions, setShowNotebookOptions] = useState(false);
+  const [showNewNotebook, setShowNewNotebook] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+  const [darken, setDarken] = useState(false);
+  const [selectedNotebook, setSelectedNotebook] = useState(null);
+  const [showUserOptions, setShowUserOptions] = useState(false);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    const getUser = async () => {
+      await SecureStorage.getItemAsync("supabase.auth.user").then(
+        async (res) => {
+          setUser(JSON.parse(res));
+          setRefresh(!refresh);
+        }
+      );
+    };
+    getUser();
+    const subscription = navigation.addListener("focus", () => {
+      getUser();
+    });
+    return subscription;
+  }, [navigation]);
 
   React.useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
-      const sets = await getStudySets("d4de7fa9-7bba-474f-9f05-3afcc603df4d");
-      setStudySets(sets ? sets : []);
+      const sets = user ? await getStudySets(user.id) : [];
+      setStudySets(sets);
       setIsLoading(false);
     }
     fetchData();
-  }, []);
+  }, [refresh]);
 
-  const focusInput = () => {
-    searchRef.current.focus();
+  React.useEffect(() => {
+    if (darken) {
+      Animated.timing(fadeAnim, {
+        toValue: 0.5,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
+    }
+  }, [darken]);
+
+  const handleNotebookOptions = (id) => {
+    setSelectedNotebook(studySets.find((set) => set.id === id));
+    setShowNotebookOptions(true);
+    setDarken(true);
   };
 
   const noteSets = studySets.map((data, index) => {
     return (
-      <View key={index}>
-        <Notebook name={data.name} id={data.id} colour={data.colour} />
+      <View key={index} style={{ marginBottom: 15 }}>
+        <Notebook
+          name={data.name}
+          id={data.id}
+          colour={data.colour}
+          triggerModal={(id) => handleNotebookOptions(id)}
+        />
       </View>
     );
   });
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <View style={styles.icon}>
-          <Text
-            style={[
-              styles.text,
-              {
-                color: "#FFFFF0",
-                fontSize: 20,
-                height: 40,
-                width: 40,
-                flex: 1,
-                textAlign: "center",
-                textAlignVertical: "center",
-                lineHeight: "38",
-              },
-            ]}
-          >
-            H
-          </Text>
-        </View>
-        <Pressable style={{ flexDirection: "row" }}>
-          <Text
-            style={[
-              styles.text,
-              {
-                fontSize: 16,
-                color: "#FFFFF0",
-                textAlignVertical: "center",
-                lineHeight: "38",
-                fontFamily: "PoppinsLight",
-                marginLeft: 10,
-              },
-            ]}
-          >
-            hudsonpryde@gmail.com
-          </Text>
-          <MaterialIcon
-            name={"unfold-more"}
-            size={18}
-            color={"#858585"}
-            style={{ alignSelf: "center" }}
-          />
-        </Pressable>
-        <Pressable
-          style={{
-            flex: 1,
-            alignSelf: "center",
-            alignItems: "flex-end",
-            marginRight: 15,
-          }}
-        >
-          <MaterialCommunityIcon
-            name={"dots-horizontal-circle-outline"}
-            size={24}
-            color={"#858585"}
-          />
-        </Pressable>
-      </View>
-
-      {/* Note set list */}
-      <ScrollView style={{ width: "85%", alignSelf: "center", paddingTop: 26 }}>
-        {/* search bar */}
-        <Pressable onPressIn={focusInput}>
-          <View style={styles.searchBar}>
-            <MaterialIcon
-              name={"search"}
-              size={30}
-              style={{ marginLeft: 10, color: "#858585" }}
-            ></MaterialIcon>
-            <TextInput
-              ref={searchRef}
-              keyboardAppearance={"dark"}
-              style={{
-                flex: 0.9,
-                height: "85%",
-                marginLeft: 10,
-                borderBottomWidth: 1,
-                borderColor: "#858585",
-                color: "#FFFFF0",
-              }}
-            ></TextInput>
-          </View>
-        </Pressable>
-        <Text style={styles.heading}>Your notebooks</Text>
-        {/* note set generator */}
-        {isLoading ? <ActivityIndicator size="large" color="grey" /> : noteSets}
-      </ScrollView>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showNewSetModal}
-        onRequestClose={() => {
-          setNewSetModal(!showNewSetModal);
-        }}
+    <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
+      <Animated.View
+        style={{ width: "100%", height: "100%" }}
+        opacity={fadeAnim}
       >
-        <BlurView
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "space-evenly",
-            flexDirection: "column",
-            height: "50%",
-            marginTop: 50,
-          }}
-          intensity={60}
-          tint={"light"}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignSelf: "flex-end",
-              marginRight: 25,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => {
-                setCreateSetButtonDisable(true);
-                setNewStudySetName("");
-                setNewSetModal(!showNewSetModal);
-              }}
-            >
-              <MaterialIcon name={"close"} size={40} />
-            </TouchableOpacity>
-          </View>
-          <View
-            style={{
-              flex: 1,
-            }}
-          >
-            <Text style={[styles.text, { textAlign: "center" }]}>
-              what's the name of you new study set?
-            </Text>
-          </View>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-            }}
-          >
-            <TextInput
-              style={styles.setNameInput}
-              maxLength={35}
-              autoFocus={true}
-              onChangeText={async (text) => {
-                if (text.length > 0) setCreateSetButtonDisable(false);
-                else setCreateSetButtonDisable(true);
-                setNewStudySetName(text);
-              }}
-            />
-            <TouchableOpacity
-              disabled={createSetButtonDisable}
-              onPress={async () => {
-                await createStudySet(newStudySetName, {});
-                setStudySets(await getStudySets());
-                setNewSetModal(!showNewSetModal);
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: "#000",
-                  padding: 26,
-                  borderTopRightRadius: 25,
-                  borderBottomRightRadius: 25,
-                }}
+        <View style={styles.header}>
+          <View style={{ flexDirection: "row" }}>
+            <View style={styles.icon}>
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    color: "#FFFFF0",
+                    fontSize: 20,
+                    height: 40,
+                    width: 40,
+                    flex: 1,
+                    textAlign: "center",
+                    textAlignVertical: "center",
+                    lineHeight: "38",
+                  },
+                ]}
               >
-                <Text style={[styles.text, { color: "#f4f3f2" }]}>create</Text>
-              </View>
-            </TouchableOpacity>
+                H
+              </Text>
+            </View>
+            <Pressable
+              style={{ flexDirection: "row" }}
+              onPress={() => {
+                LayoutAnimation.configureNext(
+                  LayoutAnimation.Presets.easeInEaseOut
+                );
+                setShowUserOptions(!showUserOptions);
+              }}
+            >
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    fontSize: 16,
+                    color: "#FFFFF0",
+                    textAlignVertical: "center",
+                    lineHeight: "38",
+                    fontFamily: "PoppinsLight",
+                    marginLeft: 10,
+                  },
+                ]}
+              >
+                {user ? user.email : "Loading..."}
+              </Text>
+              <MaterialIcon
+                name={"unfold-more"}
+                size={18}
+                color={"#858585"}
+                style={{ alignSelf: "center" }}
+              />
+            </Pressable>
+            <Pressable
+              style={{
+                flex: 1,
+                alignSelf: "center",
+                alignItems: "flex-end",
+                marginRight: 15,
+              }}
+            >
+              <MaterialCommunityIcon
+                name={"dots-horizontal-circle-outline"}
+                size={24}
+                color={Dark.secondary}
+              />
+            </Pressable>
           </View>
-          <View style={{ flex: 2 }}></View>
-        </BlurView>
-      </Modal>
+          {showUserOptions ? (
+            <View style={{ flexDirection: "row", justifyContent: "center" }}>
+              <Pressable
+                onPress={() => {
+                  supabase.auth.signOut();
+                }}
+                style={[
+                  {
+                    height: 40,
+                    width: 100,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderWidth: 0,
+                    backgroundColor: Dark.quatrenary,
+                    borderRadius: 15,
+                  },
+                ]}
+              >
+                <Text style={styles.optionsText}>Sign out</Text>
+              </Pressable>
+            </View>
+          ) : null}
+        </View>
+
+        {/* notebook list */}
+        <ScrollView style={{ width: "100%", alignSelf: "center", padding: 25 }}>
+          <View
+            style={{ flexDirection: "row", justifyContent: "space-between" }}
+          >
+            <Text style={styles.heading}>Your notebooks</Text>
+            <Pressable
+              onPress={() => {
+                setShowNewNotebook(true);
+                setDarken(true);
+              }}
+            >
+              <MaterialIcon name={"add"} size={34} color={Dark.secondary} />
+            </Pressable>
+          </View>
+          {isLoading ? (
+            <ActivityIndicator size="large" color="grey" />
+          ) : (
+            noteSets
+          )}
+        </ScrollView>
+      </Animated.View>
+      {/* Notebook options modal */}
+      <NotebookOptions
+        notebook={selectedNotebook}
+        requestClose={() => {
+          setShowNotebookOptions(false);
+          setDarken(false);
+        }}
+        showModal={showNotebookOptions}
+        requestRefresh={() => setRefresh(!refresh)}
+        requestUpdate={(notebook) => {
+          setStudySets(
+            studySets.map((set) => {
+              if (set.id === notebook.id) {
+                return notebook;
+              } else {
+                return set;
+              }
+            })
+          );
+        }}
+      />
+      {/* New notebook modal */}
+      <NewNotebookModal
+        userId={user ? user.id : null}
+        requestClose={() => {
+          setShowNewNotebook(false);
+          setDarken(false);
+        }}
+        visible={showNewNotebook}
+        onConfirm={(notebook) => {
+          setStudySets((sets) => [...sets, notebook]);
+          setShowNewNotebook(false);
+          setDarken(false);
+        }}
+      />
     </SafeAreaView>
   );
 };
@@ -249,18 +281,29 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     gap: 11,
   },
-  searchBar: {
-    borderColor: "#858585",
-    borderWidth: 1,
-    borderRadius: 25,
+  optionsContainer: {
+    backgroundColor: "#242424",
+    borderRadius: 15,
+    flexDirection: "column",
+    margin: 25,
+    height: 170,
+    overflow: "hidden",
+  },
+  optionButton: {
+    borderBottomWidth: 3,
+    borderBottomColor: Dark.tertiary,
+    padding: 15,
+    flex: 1,
     flexDirection: "row",
-    alignContent: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 5,
-    marginBottom: 15,
+    alignItems: "center",
+  },
+  optionsModal: {
+    flex: 2,
+    borderRadius: 15,
+    backgroundColor: Dark.tertiary,
   },
   header: {
-    flexDirection: "row",
+    flexDirection: "column",
     paddingVertical: 14,
     borderBottomWidth: 2,
     width: "100%",
@@ -271,9 +314,9 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "600",
     fontSize: 24,
-    lineHeight: 35,
-    marginBottom: 10,
-    color: "#5E5E5E",
+    lineHeight: 32,
+    marginBottom: 20,
+    color: Dark.secondary,
   },
   text: {
     fontFamily: "Poppins",
@@ -283,24 +326,13 @@ const styles = StyleSheet.create({
     lineHeight: 30,
     color: "#292727",
   },
-  setNameInput: {
-    borderWidth: 5,
-    padding: 20,
-    borderTopLeftRadius: 25,
-    borderBottomLeftRadius: 25,
-    fontFamily: "Poppins",
+  optionsText: {
+    fontFamily: "PoppinsRegular",
     fontStyle: "normal",
     fontWeight: "600",
-    fontSize: 24,
-    color: "#292727",
-    width: 250,
-    height: 82,
-  },
-  floatingButton: {
-    backgroundColor: "#588fe2",
-    borderRadius: 45,
-    position: "absolute",
-    borderWidth: 2,
+    fontSize: 14,
+    lineHeight: 30,
+    color: Dark.primary,
   },
   icon: {
     borderWidth: 1,

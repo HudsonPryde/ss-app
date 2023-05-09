@@ -6,7 +6,6 @@ import {
   View,
   Modal,
   Pressable,
-  ActivityIndicator,
   PanResponder,
   Animated,
   Dimensions,
@@ -24,6 +23,8 @@ const NotebookScreen = ({ route, navigation }) => {
   const SWIPE_THRESHOLD = 0.25 * SCREEN_WIDTH;
   const [isFlipped, setIsFlipped] = useState(false);
   const [animation] = useState(new Animated.Value(0));
+  const animatedGrow = useRef(new Animated.Value(0.75)).current;
+  const [swipped, setSwipped] = useState(false);
   const [noteNumber, setNoteNumber] = useState(0);
 
   useEffect(() => {
@@ -37,11 +38,32 @@ const NotebookScreen = ({ route, navigation }) => {
     setNoteNumber(noteNumber + 1);
   };
 
+  const opacity = animatedGrow.interpolate({
+    inputRange: [0.75, 0.9, 1],
+    outputRange: [0, 0.5, 1],
+  });
+
+  const handleGrow = () => {
+    Animated.timing(animatedGrow, {
+      toValue: swipped ? 0.75 : 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start(() => {
+      setSwipped(!swipped);
+      Animated.timing(animatedGrow, {
+        delay: 1000,
+        toValue: 0.75,
+        duration: 300,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
     Animated.timing(animation, {
       toValue: isFlipped ? 0 : 180,
-      duration: 300,
+      duration: 600,
       useNativeDriver: true,
     }).start();
   };
@@ -68,10 +90,11 @@ const NotebookScreen = ({ route, navigation }) => {
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: (evt, gestureState) => {
-        position.setValue({ x: gestureState.dx, y: gestureState.dy });
+        position.setValue({ x: gestureState.dx, y: 0 });
       },
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx > SWIPE_THRESHOLD) {
+          handleGrow();
           // Swiped to the right
           Animated.spring(position, {
             toValue: { x: SCREEN_WIDTH, y: 0 },
@@ -85,6 +108,7 @@ const NotebookScreen = ({ route, navigation }) => {
             }).start();
           });
         } else if (gestureState.dx < -SWIPE_THRESHOLD) {
+          handleGrow();
           Animated.spring(position, {
             toValue: {
               x: -SCREEN_WIDTH,
@@ -127,27 +151,46 @@ const NotebookScreen = ({ route, navigation }) => {
         </Pressable>
       </View>
       {/* main question container */}
-      <Animated.View
-        style={[
-          styles.cardContainer,
-          { transform: position.getTranslateTransform() },
-        ]}
-        {...panResponder.panHandlers}
-        onResponderEnd={handleNextNote}
-      >
-        <Pressable
-          onPress={handleFlip}
-          style={{ width: "100%", height: "100%" }}
+      <Animated.View style={[styles.cardContainer]}>
+        <Animated.View
+          style={[
+            styles.card,
+            styles.backCard,
+            {
+              transform: [{ scale: animatedGrow }],
+            },
+          ]}
         >
-          <Animated.View style={[styles.card, frontAnimatedStyle]}>
-            <Text style={styles.cardText}>{notes[noteNumber].question}</Text>
-          </Animated.View>
-          <Animated.View
-            style={[styles.card, styles.backCard, backAnimatedStyle]}
+          <Animated.Text style={[styles.cardText, { opacity: opacity }]}>
+            {notes[noteNumber].question}
+          </Animated.Text>
+        </Animated.View>
+        <Animated.View
+          style={[{ transform: position.getTranslateTransform() }]}
+          {...panResponder.panHandlers}
+          onResponderEnd={() => {
+            if (isFlipped) {
+              handleFlip;
+            }
+            handleNextNote;
+          }}
+        >
+          <Pressable
+            onPress={handleFlip}
+            style={{ width: "100%", height: "100%" }}
           >
-            <Text style={styles.cardText}>{notes[noteNumber].answer}</Text>
-          </Animated.View>
-        </Pressable>
+            <Animated.View style={[styles.card, frontAnimatedStyle]}>
+              <Animated.Text style={styles.cardText}>
+                {notes[noteNumber].question}
+              </Animated.Text>
+            </Animated.View>
+            <Animated.View
+              style={[styles.card, styles.backCard, backAnimatedStyle]}
+            >
+              <Text style={styles.cardText}>{notes[noteNumber].answer}</Text>
+            </Animated.View>
+          </Pressable>
+        </Animated.View>
       </Animated.View>
     </SafeAreaView>
   );

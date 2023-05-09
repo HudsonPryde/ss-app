@@ -11,7 +11,7 @@ import {
   Modal,
 } from "react-native";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { createSetNote, getSectionNotes } from "../dao/studySets";
+import { createNotes, getSectionNotes } from "../dao/notes";
 import { removeSection, renameSection } from "../dao/notebookSections";
 import { TextInput } from "react-native-gesture-handler";
 if (
@@ -21,7 +21,12 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NotebookSection = ({ sectionName, sectionId, requestRefresh }) => {
+const NotebookSection = ({
+  sectionName,
+  sectionId,
+  requestRefresh,
+  requestDarken,
+}) => {
   const [expandPressed, setExpandPressed] = useState(false);
   const [showOptionModal, setShowOptionModal] = useState(false);
   const [showAddNotesModal, setShowAddNotesModal] = useState(false);
@@ -36,6 +41,14 @@ const NotebookSection = ({ sectionName, sectionId, requestRefresh }) => {
     }
     fetchData();
   }, [refresh]);
+
+  useEffect(() => {
+    if (showAddNotesModal || showOptionModal) {
+      requestDarken(true);
+    } else {
+      requestDarken(false);
+    }
+  }, [showAddNotesModal, showOptionModal]);
 
   const handleRemoveSection = async () => {
     try {

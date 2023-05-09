@@ -1,9 +1,21 @@
-import React from "react";
-import { Pressable, View, StyleSheet, Text, Dimensions } from "react-native";
+import React, { useEffect } from "react";
+import { Dark } from "../lib/Theme";
+import { Pressable, View, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-const Notebook = ({ name, id, colour }) => {
+import { countSections } from "../dao/studySets";
+const Notebook = ({ name, id, colour, triggerModal }) => {
   const navigation = useNavigation();
+  const [sectionCount, setSectionCount] = React.useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const count = await countSections(id);
+      setSectionCount(count);
+    }
+    fetchData();
+  }, []);
+
   return (
     <Pressable
       onPress={() =>
@@ -24,19 +36,30 @@ const Notebook = ({ name, id, colour }) => {
           }}
         >
           <Text style={styles.text}>{name}</Text>
-          <Pressable>
-            <MaterialIcon name={"more-horiz"} size={25} color={"#D8D8D8"} />
+          <Pressable onPress={() => triggerModal(id)} hitSlop={10}>
+            <MaterialIcon name={"more-horiz"} size={25} color={"#FFFFF0"} />
           </Pressable>
         </View>
-
-        <View style={styles.setCountPill}>
-          <Text
-            style={[
-              styles.text,
-              { color: "#121212", fontSize: 16, textAlign: "center" },
-            ]}
-          >
-            8 sets
+        <View
+          style={{
+            flexDirection: "row",
+            minWidth: 100,
+            maxWidth: 120,
+            justifyContent: "space-evenly",
+          }}
+        >
+          <View style={styles.setCountPill}>
+            <Text
+              style={[
+                styles.text,
+                { color: "#121212", fontSize: 16, textAlign: "center" },
+              ]}
+            >
+              {sectionCount}
+            </Text>
+          </View>
+          <Text style={[styles.text, { fontFamily: "Poppins", fontSize: 14 }]}>
+            sections
           </Text>
         </View>
       </View>
@@ -47,7 +70,7 @@ const Notebook = ({ name, id, colour }) => {
 const styles = StyleSheet.create({
   studySet: {
     padding: 15,
-    height: 150,
+    height: 100,
     flexDirection: "column",
     justifyContent: "space-between",
     alignContent: "center",
@@ -62,9 +85,9 @@ const styles = StyleSheet.create({
   },
   setCountPill: {
     backgroundColor: "#FFFFF0",
-    borderRadius: 25,
+    borderRadius: 15,
     paddingHorizontal: 10,
-    width: 100,
+    maxWidth: 50,
   },
 });
 

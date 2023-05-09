@@ -22,17 +22,22 @@ description: create a notebook section
 props:
  - name: user given section name
  - notebook_id: id of the notebook to add the section to
+returns:
+ - new section contained in an array
 */
 export const createSection = async (name, notebook_id) => {
-  const { error } = await supabase.from("Sections").insert({
-    name: name,
-    notebook_id: notebook_id,
-  });
+  const { data, error } = await supabase
+    .from("Sections")
+    .insert({
+      name: name,
+      notebook_id: notebook_id,
+    })
+    .select();
   if (error) {
     console.error(error);
     return error;
   }
-  return true;
+  return data[0];
 };
 
 /*
