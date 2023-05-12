@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Dark } from "../lib/Theme";
 import {
   StyleSheet,
@@ -19,7 +19,7 @@ import Notebook from "../components/Notebook";
 import NotebookOptions from "../components/modals/NotebookOptions";
 import NewNotebookModal from "../components/modals/NewNotebookModal";
 import { supabase } from "../lib/initSupabase";
-import * as SecureStorage from "expo-secure-store";
+import { AuthContext } from "../provider/AuthProvider";
 
 if (
   Platform.OS === "android" &&
@@ -30,7 +30,7 @@ if (
 
 const MainScreen = ({ navigation }) => {
   const [studySets, setStudySets] = useState([]);
-  const [user, setUser] = useState(null);
+  const { session, user } = useContext(AuthContext);
   const [showNotebookOptions, setShowNotebookOptions] = useState(false);
   const [showNewNotebook, setShowNewNotebook] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -40,23 +40,7 @@ const MainScreen = ({ navigation }) => {
   const [showUserOptions, setShowUserOptions] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  React.useEffect(() => {
-    const getUser = async () => {
-      await SecureStorage.getItemAsync("supabase.auth.user").then(
-        async (res) => {
-          setUser(JSON.parse(res));
-          setRefresh(!refresh);
-        }
-      );
-    };
-    getUser();
-    const subscription = navigation.addListener("focus", () => {
-      getUser();
-    });
-    return subscription;
-  }, [navigation]);
-
-  React.useEffect(() => {
+  useEffect(() => {
     async function fetchData() {
       setIsLoading(true);
       const sets = user ? await getStudySets(user.id) : [];
@@ -66,7 +50,7 @@ const MainScreen = ({ navigation }) => {
     fetchData();
   }, [refresh]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (darken) {
       Animated.timing(fadeAnim, {
         toValue: 0.5,
@@ -121,7 +105,7 @@ const MainScreen = ({ navigation }) => {
                     flex: 1,
                     textAlign: "center",
                     textAlignVertical: "center",
-                    lineHeight: "38",
+                    lineHeight: 38,
                   },
                 ]}
               >
@@ -144,7 +128,7 @@ const MainScreen = ({ navigation }) => {
                     fontSize: 16,
                     color: "#FFFFF0",
                     textAlignVertical: "center",
-                    lineHeight: "38",
+                    lineHeight: 38,
                     fontFamily: "PoppinsLight",
                     marginLeft: 10,
                   },
@@ -264,8 +248,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#101010",
-    alignItems: "start",
-    justifyContent: "start",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
   studySet: {
     padding: 15,

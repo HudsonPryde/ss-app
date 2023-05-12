@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import env from "../env";
+import React, { useState } from "react";
 import {
   Alert,
   StyleSheet,
@@ -10,32 +9,21 @@ import {
 } from "react-native";
 import { supabase } from "../lib/initSupabase";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { makeRedirectUri, startAsync } from "expo-auth-session";
-import * as Google from "expo-auth-session/providers/google";
+import { makeRedirectUri } from "expo-auth-session";
+import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Dark } from "../lib/Theme";
+
+WebBrowser.maybeCompleteAuthSession();
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const redirectUrl = makeRedirectUri({ path: "/auth/callback" });
-  // const [request, response, promptAsync] = Google.useAuthRequest({
-  //   iosClientId:
-  //     "1089486777421-c5kth7j1vt2s6bem3286pfs1lb6t7ju8.apps.googleusercontent.com",
-  //   expoClientId:
-  //     "1089486777421-vmviottmtg79toqgdfrnukfn3qpnjdiv.apps.googleusercontent.com",
-  // });
-
-  // useEffect(() => {
-  //   if (response?.type === "success") {
-  //     console.log(response);
-  //     supabase.auth.setSession({
-  //       access_token: response.authentication.accessToken,
-  //     });
-  //   }
-  // }, [response]);
+  const redirectUrl = makeRedirectUri({
+    scheme: "com.hudsonpryde.ssapp",
+  });
 
   const signInWithEmail = async () => {
     setLoading(true);
@@ -50,14 +38,19 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const signInWithGoogle = async () => {
-    const authResponse = await startAsync({
-      authUrl: `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${redirectUrl}`,
-      returnUrl: redirectUrl,
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: redirectUrl,
+      },
     });
-    if (authResponse.type === "success") {
-      supabase.auth.setSession({
-        access_token: authResponse.params.access_token,
-        refresh_token: authResponse.params.refresh_token,
+    const { type, url } = await WebBrowser.openAuthSessionAsync(data.url);
+    if (type === "success") {
+      const access_token = url.match(/access_token=(.*?)&/)[1];
+      const refresh_token = url.match(/refresh_token=(.*?)&/)[1];
+      await supabase.auth.setSession({
+        access_token: access_token,
+        refresh_token: refresh_token,
       });
     }
   };
@@ -118,8 +111,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "start",
-    justifyContent: "start",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
   header: {
     flexDirection: "row",

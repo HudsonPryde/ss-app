@@ -312,8 +312,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "start",
-    justifyContent: "start",
+    alignItems: "flex-start",
+    justifyContent: "flex-start",
   },
   header: {
     paddingVertical: 20,
