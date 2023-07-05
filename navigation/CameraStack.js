@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import NotesScreen from "../screens/NotesScreen";
 import CameraScreen from "../screens/CameraScreen";
+import ScannedTextScreen from "../screens/ScannedTextScreen";
+import NotesScreen from "../screens/NotesScreen";
 
 const CameraStack = createNativeStackNavigator();
 const CameraNav = () => {
@@ -17,8 +18,15 @@ const CameraNav = () => {
         },
       }}
     >
-      <CameraStack.Screen name="Camera" component={CameraScreen} />
-      <CameraStack.Screen name="Notes" component={NotesScreen} />
+      <CameraStack.Screen
+        name="Camera"
+        component={CameraScreen}
+        initialParams={{ initText: "" }}
+      />
+      <CameraStack.Group screenOptions={{ presentation: "modal" }}>
+        <CameraStack.Screen name="ScannedText" component={ScannedTextScreen} />
+      </CameraStack.Group>
+      <CameraStack.Screen name="CameraNotes" component={NotesScreen} />
     </CameraStack.Navigator>
   );
 };

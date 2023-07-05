@@ -10,9 +10,11 @@ import {
 } from "react-native";
 import { Dark, Notebook } from "../../lib/Theme";
 import { createStudySet } from "../../dao/studySets";
+import { useNotebooksDispatch } from "../../provider/NotebookProvider";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
+  const dispatch = useNotebooksDispatch();
   const [showModal, setShowModal] = useState(false);
   const [notebookName, setNotebookName] = useState("");
   const [selectedColour, setSelectedColour] = useState(Notebook.grape);
@@ -24,7 +26,8 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
   const handleCreateNotebook = async ({ id, name, colour }) => {
     try {
       const notebook = await createStudySet(id, name, colour);
-      onConfirm(notebook);
+      dispatch({ type: "added", ...notebook });
+      onConfirm();
     } catch (error) {
       console.log(error);
     }

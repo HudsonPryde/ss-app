@@ -3,26 +3,36 @@ import { Dark } from "../lib/Theme";
 import { Pressable, View, StyleSheet, Text } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { countSections } from "../dao/studySets";
-const Notebook = ({ name, id, colour, triggerModal }) => {
+import { useSections } from "../provider/SectionsProvider";
+import { useNotebooks } from "../provider/NotebookProvider";
+
+const Notebook = ({ id, triggerModal }) => {
   const navigation = useNavigation();
   const [sectionCount, setSectionCount] = React.useState(null);
+  // retrieve notebooks from context
+  const notebooks = useNotebooks();
+  // retrieve sections from context
+  const sections = useSections();
+  const { name, colour } = notebooks.find((notebook) => notebook.id === id);
 
   useEffect(() => {
-    async function fetchData() {
-      const count = await countSections(id);
-      setSectionCount(count);
-    }
-    fetchData();
-  }, []);
+    // count the number of sections in the notebook
+    const count = sections?.filter(
+      (section) => section.notebook_id === id
+    ).length;
+    setSectionCount(count);
+  }, [notebooks, sections]);
+
+  // dont render the notebook until the section count is known
+  if (!sectionCount) {
+    return null;
+  }
 
   return (
     <Pressable
       onPress={() =>
         navigation.navigate("Notebook", {
-          notebookId: id,
-          notebookName: name,
-          notebookColour: colour,
+          id: id,
         })
       }
     >

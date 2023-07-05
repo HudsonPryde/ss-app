@@ -3,13 +3,30 @@ import { supabase } from "../lib/initSupabase.js";
 /*
 description: return all sections of a notebook
 props:
- - notebook_id: id of the notebook to add the section to
+ - notebook_id: id of the notebook to get the section of
 */
 export const getSections = async (notebook_id) => {
   const { data, error } = await supabase
     .from("Sections")
     .select()
     .eq("notebook_id", notebook_id);
+  if (error) {
+    console.error(error);
+    return error;
+  }
+  return data;
+};
+
+/*
+description: return all sections of a list of notebook
+props:
+ - notebook_ids: ids of the notebooks to get the sections of
+*/
+export const getBulkSections = async (notebook_ids) => {
+  const { data, error } = await supabase
+    .from("Sections")
+    .select()
+    .in("notebook_id", notebook_ids);
   if (error) {
     console.error(error);
     return error;

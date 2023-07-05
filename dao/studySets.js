@@ -24,7 +24,8 @@ export const getStudySets = async (user_id) => {
   let { data: Notebooks, error } = await supabase
     .from("Notebooks")
     .select("*")
-    .eq("user_id", user_id);
+    .eq("user_id", user_id)
+    .order("created_at", { ascending: false });
   if (error) {
     console.error(error);
     return error;

@@ -2,12 +2,24 @@ import React from "react";
 import { StatusBar } from "expo-status-bar";
 import Navigation from "./navigation";
 import { AuthProvider } from "./provider/AuthProvider";
+import { NotebooksProvider } from "./provider/NotebookProvider";
+import { SectionsProvider } from "./provider/SectionsProvider";
+import { NotesProvider } from "./provider/NotesProvider";
+import { FlashcardsProvider } from "./provider/FlashcardsProvider";
 
 export default function App() {
   return (
     <AuthProvider>
-      <Navigation />
-      <StatusBar style={"light"} />
+      <NotebooksProvider>
+        <SectionsProvider>
+          <NotesProvider>
+            <FlashcardsProvider>
+              <Navigation />
+              <StatusBar style={"light"} />
+            </FlashcardsProvider>
+          </NotesProvider>
+        </SectionsProvider>
+      </NotebooksProvider>
     </AuthProvider>
   );
 }

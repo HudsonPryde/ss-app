@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "ss-app",
+    "name": "Study Scribe",
     "slug": "ss-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,10 +8,21 @@
     "userInterfaceStyle": "dark",
     "scheme": "com.hudsonpryde.ssapp",
     "originalFullName": "@hudsonpryde/ss-app",
+    "backgroundColor": "#101010",
+    "plugins": [
+      "@react-native-voice/voice",
+      "@react-native-google-signin/google-signin",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ]
+    ],
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#101010"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
@@ -19,14 +30,30 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "infoPlist": {
+      "NSCameraUsageDescription": "This app uses the camera to scan documents",
+      "NSMicrophoneUsageDescription": "This app uses the microphone to transcribe audio",
+      "NSPhotoLibraryUsageDescription": "This app uses the photo library to retrieve images",
+      "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to convert your speech to text."
+    },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.hudsonpryde.ssapp"
+      "bundleIdentifier": "com.hudsonpryde.ssapp",
+      "backgroundColor": "#000000",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.1089486777421-c5kth7j1vt2s6bem3286pfs1lb6t7ju8"
+            ]
+          }
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#FFFFFF"
+        "backgroundColor": "#000000"
       },
       "package": "com.hudsonpryde.ssapp"
     },
@@ -38,5 +65,11 @@
         "projectId": "c50b2d11-714d-4e9c-8470-7f0d5b44b8ec"
       }
     }
+  },
+  "react-native-google-mobile-ads": {
+    "android_app_id": "ca-app-pub-8992141010215842~4116132267",
+    "ios_app_id": "ca-app-pub-8992141010215842~1957836819",
+    "delay_app_measurement_init": true,
+    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
   }
 }

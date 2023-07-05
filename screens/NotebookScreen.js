@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Dark } from "../lib/Theme";
 import {
   StyleSheet,
@@ -9,14 +9,26 @@ import {
   Pressable,
   LayoutAnimation,
   UIManager,
-  Animated,
 } from "react-native";
+import Animated, {
+  Layout,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+  SlideInRight,
+  SlideOutRight,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { createSetNote, getSectionNotes } from "../dao/studySets";
-import { getSections, createSection } from "../dao/notebookSections";
+import { MaterialIcons } from "@expo/vector-icons";
+import {
+  removeSection,
+  getSections,
+  createSection,
+} from "../dao/notebookSections";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import NotebookSection from "../components/NotebookSection";
+import { useNotebooks } from "../provider/NotebookProvider";
+import { useSections, useSectionsDispatch } from "../provider/SectionsProvider";
 
 if (
   Platform.OS === "android" &&
@@ -28,177 +40,205 @@ if (
 const NotebookScreen = () => {
   const route = useRoute();
   const navigation = useNavigation();
-  const notebookId = route.params.notebookId;
-  const notebookName = route.params.notebookName;
-  const notebookColour = route.params.notebookColour;
-  const [showModal, setShowModal] = useState(false);
-  const [refresh, setRefresh] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [addSectionPressed, setAddSectionPressed] = useState(false);
+  const id = route.params.id;
+  const notebooks = useNotebooks();
+  const dispatch = useSectionsDispatch();
+  // get sections of the notebook from context
+  const sections = useSections();
   const [notebookSections, setNotebookSections] = useState([]);
-  const [newNoteText, setNewNoteText] = useState("");
+  const { name, colour } = notebooks.find((notebook) => notebook.id === id);
+  const [addSectionPressed, setAddSectionPressed] = useState(false);
   const [newSectionName, setNewSectionName] = useState("");
   const [darken, setDarken] = useState(false);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useSharedValue(1);
 
-  React.useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      setNotebookSections(await getSections(notebookId));
-      setIsLoading(false);
-    }
-    fetchData();
-  }, [refresh]);
-
-  async function handleAddNote() {
-    try {
-      await createSetNote(notebookId, newNoteText, "", "", "");
-      setNewNoteText("");
-      setRefresh(!refresh);
-      setShowModal(!showModal);
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
-  React.useEffect(() => {
+  useEffect(() => {
     if (darken) {
-      Animated.timing(fadeAnim, {
-        toValue: 0.5,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      fadeAnim.value = withTiming(0.5, { duration: 200 });
     } else {
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      fadeAnim.value = withTiming(1, { duration: 200 });
     }
   }, [darken]);
 
-  async function handleNavigateFlashcards() {
-    try {
-      if (!notebookSections) {
-        return false;
-      }
-      let sectionIds = notebookSections.map(({ id }) => id);
-      const notes = await getSectionNotes(sectionIds);
-      console.log(notes);
-      navigation.navigate("Flashcards", {
-        notebookId: notebookId,
-        notes: notes,
-        notebookColour: notebookColour,
-      });
-    } catch (error) {
-      console.error(error);
-    }
-  }
+  const darkenStyle = useAnimatedStyle(() => {
+    return {
+      opacity: fadeAnim.value,
+    };
+  });
 
   async function handleAddSection() {
     try {
-      await createSection(newSectionName, notebookId);
-      setRefresh(!refresh);
+      const section = await createSection(newSectionName, id);
+      // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+      dispatch({ type: "added", ...section });
       setAddSectionPressed(!addSectionPressed);
+      setNewSectionName("");
     } catch (error) {
       console.error(error);
     }
   }
 
-  const sections = notebookSections.map((data, index) => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    return (
-      <View style={{ alignSelf: "center", marginBottom: 25 }} key={index}>
-        <NotebookSection
-          sectionName={data.name}
-          sectionId={data.id}
-          requestRefresh={() => setRefresh(!refresh)}
-          requestDarken={(req) => setDarken(req)}
-        />
+  const newSectionComponent = (
+    <View
+      style={{
+        alignSelf: "center",
+      }}
+    >
+      <View style={styles.sectionContainer}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignContent: "center",
+            alignItems: "center",
+            flex: 1,
+          }}
+        >
+          <MaterialIcons
+            name={"folder-outline"}
+            size={28}
+            color={Dark.secondary}
+            style={{ paddingHorizontal: 15 }}
+          />
+          <TextInput
+            maxLength={20}
+            keyboardAppearance={"dark"}
+            autoFocus={true}
+            enterKeyHint={"done"}
+            returnKeyLabel={"done"}
+            returnKeyType={"done"}
+            value={newSectionName}
+            onChangeText={setNewSectionName}
+            onBlur={() => {
+              setDarken(false);
+              setAddSectionPressed(false);
+              setNewSectionName("");
+            }}
+            onSubmitEditing={handleAddSection}
+            style={[styles.text, { flex: 1, lineHeight: 25, fontSize: 16 }]}
+          ></TextInput>
+        </View>
+        <View>
+          <MaterialIcons
+            name={"dots-horizontal"}
+            size={22}
+            color={Dark.secondary}
+          />
+        </View>
       </View>
+    </View>
+  );
+
+  const notebookSection = (data) => {
+    return (
+      <Animated.View
+        key={data.id}
+        layout={Layout.easing()}
+        // entering={SlideInRight}
+        exiting={SlideOutRight}
+      >
+        <View
+          style={[
+            {
+              alignSelf: "center",
+            },
+            { borderBottomColor: Dark.secondary, borderBottomWidth: 1 },
+          ]}
+        >
+          <NotebookSection
+            section={data}
+            requestDarken={(req) => setDarken(req)}
+          />
+        </View>
+      </Animated.View>
     );
-  });
+  };
+
+  useEffect(() => {
+    // get sections of the notebook from context
+    const render = sections
+      ?.filter((s) => s.notebook_id === id)
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    // construct an array of section components from the render list
+    // when updating the list of components, we want to keep the ones that are already rendered
+    // the goal of this is to not re-render the entire list and trigger a layout animation
+    // create a copy of the current list of components
+    const current = [...notebookSections];
+    // add everything that is in the render list but not in the current list
+    render.forEach((r) => {
+      if (!current.find((c) => c.key === r.id)) {
+        current.splice(0, 0, notebookSection(r));
+      }
+    });
+    // remove everything that is in the current list but not in the render list
+    current.forEach((c) => {
+      if (!render.find((r) => r.id === c.key)) {
+        current.splice(current.indexOf(c), 1);
+      }
+    });
+    // set the new list of components ordered by date added
+    setNotebookSections(current);
+  }, [sections]);
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
       {/* screen wrapper to darken when a modal is open */}
-      <Animated.View
-        style={{ width: "100%", height: "100%" }}
-        opacity={fadeAnim}
-      >
-        <View style={[styles.header, { borderBottomColor: notebookColour }]}>
+      <Animated.View style={[darkenStyle, { width: "100%", height: "100%" }]}>
+        <View style={[styles.header, { borderBottomColor: colour }]}>
           {/* back button */}
           <Pressable
             onPress={() => navigation.goBack()}
             style={{ marginHorizontal: 10 }}
           >
-            <MaterialCommunityIcon
+            <MaterialIcons
               name={"chevron-left"}
               size={42}
               color={Dark.secondary}
-            ></MaterialCommunityIcon>
+            ></MaterialIcons>
           </Pressable>
           {/* Note set header */}
           <Text numberOfLines={1} style={styles.heading}>
-            {notebookName}
+            {name}
           </Text>
-          <Pressable onPress={() => {}} style={{ marginHorizontal: 15 }}>
-            <MaterialCommunityIcon
-              name={"dots-horizontal-circle-outline"}
-              size={22}
-              color={Dark.secondary}
-            />
-          </Pressable>
         </View>
-        <ScrollView style={{ width: "100%" }}>
+        <Animated.ScrollView style={{ width: "100%" }}>
           {/* Study mode buttons */}
           <View style={styles.buttonContainer}>
             {/* study flash cards */}
             <Pressable
-              style={[styles.studyButton, { borderColor: notebookColour }]}
+              style={[
+                styles.studyButton,
+                {
+                  backgroundColor: Dark.tertiary,
+                  paddingVertical: 10,
+                  borderWidth: 1,
+                  borderColor: Dark.quatrenary,
+                },
+              ]}
               onPress={() =>
-                // navigation.navigate("Flashcards", { notebookId, studyNotes })
-                handleNavigateFlashcards()
+                navigation.navigate("FlashcardOptions", {
+                  sections: sections.filter((s) => s.notebook_id === id),
+                  notebook: {
+                    id: id,
+                    name: name,
+                    colour: colour,
+                  },
+                })
               }
             >
-              <MaterialCommunityIcon
-                name={"card-multiple-outline"}
-                size={32}
-                style={{ flex: 2, marginLeft: 10 }}
-                color={Dark.primary}
-              ></MaterialCommunityIcon>
               <Text
                 style={[
                   styles.text,
                   {
-                    textAlign: "left",
+                    textAlign: "center",
+                    fontSize: 22,
                     flex: 8,
+                    fontFamily: "PoppinsRegular",
+                    color: Dark.primary,
+                    opacity: 0.95,
                   },
                 ]}
               >
-                study flashcards
-              </Text>
-            </Pressable>
-            {/* practice test */}
-            <Pressable
-              style={[styles.studyButton, { borderColor: notebookColour }]}
-            >
-              <MaterialCommunityIcon
-                name={"school-outline"}
-                size={32}
-                style={{ flex: 2, marginLeft: 10 }}
-                color={Dark.primary}
-              ></MaterialCommunityIcon>
-              <Text
-                style={[
-                  styles.text,
-                  {
-                    textAlign: "left",
-                    flex: 8,
-                  },
-                ]}
-              >
-                practice test
+                Study flashcards
               </Text>
             </Pressable>
           </View>
@@ -207,102 +247,28 @@ const NotebookScreen = () => {
             style={[
               styles.studyButton,
               {
-                padding: 3,
-                width: 165,
+                marginRight: 15,
+                marginBottom: 0,
+                width: 135,
                 alignSelf: "flex-end",
-                paddingHorizontal: 15,
-                marginRight: 25,
                 justifyContent: "space-around",
-                borderColor: notebookColour,
               },
             ]}
             onPress={() => {
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut
-              );
               setAddSectionPressed(!addSectionPressed);
             }}
           >
-            <MaterialCommunityIcon
-              name={"folder-plus-outline"}
-              size={28}
-              color={Dark.primary}
-            ></MaterialCommunityIcon>
+            <MaterialIcons name={"add"} size={22} color={Dark.secondary} />
             <Text
-              style={[
-                styles.text,
-                { fontSize: 16, borderColor: notebookColour },
-              ]}
+              style={[styles.text, { fontSize: 16, color: Dark.secondary }]}
             >
-              add section
+              Add section
             </Text>
           </Pressable>
-          {addSectionPressed ? (
-            <View
-              style={{
-                alignSelf: "center",
-                marginBottom: 25,
-              }}
-            >
-              <View style={styles.sectionContainer}>
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignContent: "center",
-                    alignItems: "center",
-                    flex: 1,
-                  }}
-                >
-                  <MaterialCommunityIcon
-                    name={"chevron-right"}
-                    size={22}
-                    color={Dark.secondary}
-                    style={{ paddingHorizontal: 15 }}
-                  />
-                  <MaterialCommunityIcon
-                    name={"folder-outline"}
-                    size={22}
-                    color={Dark.secondary}
-                    style={{ paddingRight: 5 }}
-                  />
-                  <TextInput
-                    maxLength={20}
-                    keyboardAppearance={"dark"}
-                    autoFocus={true}
-                    enterKeyHint={"done"}
-                    returnKeyLabel={"done"}
-                    returnKeyType={"done"}
-                    value={newSectionName}
-                    onChangeText={setNewSectionName}
-                    onBlur={() => {
-                      LayoutAnimation.configureNext(
-                        LayoutAnimation.Presets.easeInEaseOut
-                      );
-                      setAddSectionPressed(!addSectionPressed);
-                    }}
-                    onSubmitEditing={handleAddSection}
-                    style={[styles.text, { flex: 1, lineHeight: 25 }]}
-                  ></TextInput>
-                </View>
-                <View>
-                  <MaterialCommunityIcon
-                    name={"dots-horizontal"}
-                    size={22}
-                    color={Dark.secondary}
-                  />
-                </View>
-                <View style={{ marginLeft: 10 }}>
-                  <MaterialCommunityIcon
-                    name={"plus"}
-                    size={26}
-                    color={Dark.secondary}
-                  />
-                </View>
-              </View>
-            </View>
-          ) : null}
-          {isLoading ? null : sections}
-        </ScrollView>
+          {/*conditionally render "fake" section with text input if add section button is pressed*/}
+          {addSectionPressed ? newSectionComponent : null}
+          {notebookSections}
+        </Animated.ScrollView>
       </Animated.View>
     </SafeAreaView>
   );
@@ -329,7 +295,6 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "600",
     textAlignVertical: "center",
-    textAlign: "center",
     flex: 1,
     color: Dark.primary,
     fontSize: 24,
@@ -346,7 +311,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     borderBottomColor: Dark.secondary,
     borderBottomWidth: 1,
-    padding: 5,
+    paddingVertical: 15,
     gap: 5,
     justifyContent: "space-around",
     alignContent: "center",
@@ -354,17 +319,16 @@ const styles = StyleSheet.create({
     width: "90%",
   },
   buttonContainer: {
-    marginLeft: 15,
+    justifyContent: "center",
+    marginHorizontal: 15,
     marginTop: 25,
     marginBottom: 45,
-    flexDirection: "column",
+    flexDirection: "row",
   },
   studyButton: {
-    borderWidth: 2,
-    borderColor: Dark.secondary,
     flexDirection: "row",
     width: "70%",
-    borderRadius: 45,
+    borderRadius: 15,
     alignItems: "center",
     padding: 3,
     marginLeft: 3,

@@ -14,6 +14,10 @@ import {
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { removeStudySet, updateStudySet } from "../../dao/studySets";
 // import ConfirmModal from "./ConfirmModal";
+import {
+  useNotebooks,
+  useNotebooksDispatch,
+} from "../../provider/NotebookProvider";
 
 if (
   Platform.OS === "android" &&
@@ -22,28 +26,24 @@ if (
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NotebookOptions = ({
-  notebook,
-  requestClose,
-  showModal,
-  requestRefresh,
-  requestUpdate,
-}) => {
-  const [notebookOptions, setNotebookOptions] = useState({
-    colour: Dark.primary,
-  });
+const NotebookOptions = ({ id, requestClose, showModal }) => {
+  const notebooks = useNotebooks();
+  const dispatch = useNotebooksDispatch();
+  const notebook = notebooks.find((n) => n.id === id);
+  const [notebookOptions, setNotebookOptions] = useState(notebook);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const notebookNameRef = useRef(null);
 
   useEffect(() => {
+    const notebook = notebooks.find((n) => n.id === id);
     setNotebookOptions(notebook);
-  }, [notebook]);
+  }, [id]);
 
   const handleDeleteNotebook = async () => {
     try {
-      await removeStudySet(notebookOptions.id);
+      await removeStudySet(id);
       setConfirmDelete(!confirmDelete);
-      requestRefresh();
+      dispatch({ type: "removed", id });
       requestClose();
     } catch (error) {
       console.log(error);
@@ -62,7 +62,7 @@ const NotebookOptions = ({
       }
       const { name, colour, id } = notebookOptions;
       updateStudySet(id, { name: name, colour: colour });
-      requestUpdate(notebookOptions);
+      dispatch({ type: "updated", notebook: notebookOptions });
       requestClose();
     } catch (error) {
       console.log(error);
@@ -70,15 +70,24 @@ const NotebookOptions = ({
   };
 
   return (
-    <Modal visible={showModal} animationType="slide" transparent={true}>
+    <Modal
+      visible={showModal}
+      onRequestClose={() => handleUpdateNotebook()}
+      animationType="slide"
+      transparent={true}
+    >
       <Pressable
         onPress={() => {
           handleUpdateNotebook();
         }}
         style={{ flex: 0.5 }}
       ></Pressable>
+
       <View style={[styles.optionsModal]}>
-        <Pressable style={{ margin: 15, marginLeft: "auto", marginBottom: 0 }}>
+        <Pressable
+          style={{ margin: 15, marginLeft: "auto", marginBottom: 0 }}
+          hitSlop={30}
+        >
           <MaterialCommunityIcon
             name={"close-circle"}
             size={24}
@@ -434,7 +443,7 @@ const styles = StyleSheet.create({
   },
   optionsModal: {
     flex: 2,
-    borderRadius: 15,
+    borderRadius: 5,
     backgroundColor: Dark.tertiary,
   },
   optionsText: {

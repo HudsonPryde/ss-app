@@ -13,13 +13,20 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { getStudySets } from "../dao/studySets";
 import Notebook from "../components/Notebook";
 import NotebookOptions from "../components/modals/NotebookOptions";
 import NewNotebookModal from "../components/modals/NewNotebookModal";
 import { supabase } from "../lib/initSupabase";
 import { AuthContext } from "../provider/AuthProvider";
+import { useNotebooks } from "../provider/NotebookProvider";
+import * as Google from "expo-auth-session/providers/google";
+import env from "../env";
+import { Prompt } from "expo-auth-session";
+import {
+  AdsConsent,
+  AdsConsentDebugGeography,
+  AdsConsentStatus,
+} from "react-native-google-mobile-ads";
 
 if (
   Platform.OS === "android" &&
@@ -29,26 +36,37 @@ if (
 }
 
 const MainScreen = ({ navigation }) => {
-  const [studySets, setStudySets] = useState([]);
-  const { session, user } = useContext(AuthContext);
+  const notebooks = useNotebooks();
+  const { user } = useContext(AuthContext);
   const [showNotebookOptions, setShowNotebookOptions] = useState(false);
   const [showNewNotebook, setShowNewNotebook] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [refresh, setRefresh] = useState(false);
   const [darken, setDarken] = useState(false);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [showUserOptions, setShowUserOptions] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    async function fetchData() {
-      setIsLoading(true);
-      const sets = user ? await getStudySets(user.id) : [];
-      setStudySets(sets);
-      setIsLoading(false);
-    }
-    fetchData();
-  }, [refresh]);
+    const init = async () => {
+      AdsConsent.reset();
+      const consentInfo = await AdsConsent.requestInfoUpdate({
+        // debugGeography: AdsConsentDebugGeography.EEA,
+        testDeviceIdentifiers: ["3C09332C-6CE7-4442-A9B4-0C9106076F74"],
+      });
+      // if (
+      //   consentInfo.isConsentFormAvailable &&
+      //   consentInfo.status === AdsConsentStatus.REQUIRED
+      // ) {
+      //   const { status } = await AdsConsent.showForm();
+      //   console.log(status);
+      // }
+      // const { storeAndAccessInformationOnDevice } =
+      //   await AdsConsent.getUserChoices();
+      // console.log(consentInfo, storeAndAccessInformationOnDevice);
+    };
+
+    init();
+  }, []);
 
   useEffect(() => {
     if (darken) {
@@ -67,18 +85,16 @@ const MainScreen = ({ navigation }) => {
   }, [darken]);
 
   const handleNotebookOptions = (id) => {
-    setSelectedNotebook(studySets.find((set) => set.id === id));
+    setSelectedNotebook(notebooks.find((n) => n.id === id));
     setShowNotebookOptions(true);
     setDarken(true);
   };
 
-  const noteSets = studySets.map((data, index) => {
+  const noteSets = notebooks.map((data, index) => {
     return (
       <View key={index} style={{ marginBottom: 15 }}>
         <Notebook
-          name={data.name}
           id={data.id}
-          colour={data.colour}
           triggerModal={(id) => handleNotebookOptions(id)}
         />
       </View>
@@ -109,7 +125,7 @@ const MainScreen = ({ navigation }) => {
                   },
                 ]}
               >
-                H
+                {user ? user.email[0].toUpperCase() : "A"}
               </Text>
             </View>
             <Pressable
@@ -143,23 +159,15 @@ const MainScreen = ({ navigation }) => {
                 style={{ alignSelf: "center" }}
               />
             </Pressable>
-            <Pressable
-              style={{
-                flex: 1,
-                alignSelf: "center",
-                alignItems: "flex-end",
-                marginRight: 15,
-              }}
-            >
-              <MaterialCommunityIcon
-                name={"dots-horizontal-circle-outline"}
-                size={24}
-                color={Dark.secondary}
-              />
-            </Pressable>
           </View>
           {showUserOptions ? (
-            <View style={{ flexDirection: "row", justifyContent: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-around",
+                paddingTop: 10,
+              }}
+            >
               <Pressable
                 onPress={() => {
                   supabase.auth.signOut();
@@ -167,7 +175,7 @@ const MainScreen = ({ navigation }) => {
                 style={[
                   {
                     height: 40,
-                    width: 100,
+                    width: 200,
                     flexDirection: "row",
                     justifyContent: "center",
                     alignItems: "center",
@@ -177,7 +185,9 @@ const MainScreen = ({ navigation }) => {
                   },
                 ]}
               >
-                <Text style={styles.optionsText}>Sign out</Text>
+                <Text style={[styles.optionsText, { color: Dark.alert }]}>
+                  Sign out
+                </Text>
               </Pressable>
             </View>
           ) : null}
@@ -207,24 +217,12 @@ const MainScreen = ({ navigation }) => {
       </Animated.View>
       {/* Notebook options modal */}
       <NotebookOptions
-        notebook={selectedNotebook}
+        id={selectedNotebook?.id}
         requestClose={() => {
           setShowNotebookOptions(false);
           setDarken(false);
         }}
         showModal={showNotebookOptions}
-        requestRefresh={() => setRefresh(!refresh)}
-        requestUpdate={(notebook) => {
-          setStudySets(
-            studySets.map((set) => {
-              if (set.id === notebook.id) {
-                return notebook;
-              } else {
-                return set;
-              }
-            })
-          );
-        }}
       />
       {/* New notebook modal */}
       <NewNotebookModal
@@ -234,8 +232,7 @@ const MainScreen = ({ navigation }) => {
           setDarken(false);
         }}
         visible={showNewNotebook}
-        onConfirm={(notebook) => {
-          setStudySets((sets) => [...sets, notebook]);
+        onConfirm={() => {
           setShowNewNotebook(false);
           setDarken(false);
         }}

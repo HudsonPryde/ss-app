@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import {
   Alert,
   StyleSheet,
@@ -6,23 +6,27 @@ import {
   Pressable,
   Text,
   TextInput,
+  Image,
 } from "react-native";
 import { supabase } from "../lib/initSupabase";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { makeRedirectUri } from "expo-auth-session";
-import Constants from "expo-constants";
-import * as WebBrowser from "expo-web-browser";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Dark } from "../lib/Theme";
+import * as Google from "expo-auth-session/providers/google";
+import * as AppleAuthentication from "expo-apple-authentication";
 
-WebBrowser.maybeCompleteAuthSession();
+import env from "../env";
 
 const LoginScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const redirectUrl = makeRedirectUri({
-    scheme: "com.hudsonpryde.ssapp",
+
+  const [req, _res, promptAsync] = Google.useAuthRequest({
+    selectAccount: true,
+    shouldAutoExchangeCode: false,
+    expoClientId: "",
+    iosClientId: "",
+    androidClientId: "",
   });
 
   const signInWithEmail = async () => {
@@ -38,68 +42,137 @@ const LoginScreen = ({ navigation }) => {
   };
 
   const signInWithGoogle = async () => {
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: redirectUrl,
-      },
-    });
-    const { type, url } = await WebBrowser.openAuthSessionAsync(data.url);
-    if (type === "success") {
-      const access_token = url.match(/access_token=(.*?)&/)[1];
-      const refresh_token = url.match(/refresh_token=(.*?)&/)[1];
-      await supabase.auth.setSession({
-        access_token: access_token,
-        refresh_token: refresh_token,
+    try {
+      let res = await promptAsync({
+        url: `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${req?.redirectUri}&prompt=select_account`,
       });
+      console.log(res);
+      // After we got refresh token with the response, we can send it to supabase to sign-in the user
+      const { data, error } = await supabase.auth.refreshSession({
+        refresh_token: res.params.refresh_token,
+      });
+      console.log({ data, error });
+    } catch (error) {
+      console.log(error);
     }
   };
 
-  const signUpWithEmail = async () => {
-    setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    if (error) Alert.alert(error.message);
-    setLoading(false);
-    navigation.navigate("Main");
+  const signInWithApple = async () => {
+    try {
+      const credential = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      // console.log(credential);
+      const { data, error } = await supabase.auth.signInWithIdToken({
+        provider: "apple",
+        token: credential.identityToken,
+      });
+      console.log({ data, error });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Pressable>
-          <MaterialCommunityIcon
-            name={"chevron-left"}
-            size={38}
-            color={Dark.secondary}
-          ></MaterialCommunityIcon>
-        </Pressable>
-      </View>
-      <View style={styles.loginBox}>
-        <TextInput
-          style={[styles.text, styles.loginInput]}
-          placeholder="Email"
-          value={email}
-          onChangeText={(text) => setEmail(text)}
-        />
-        <TextInput
-          style={[styles.text, styles.loginInput]}
-          placeholder="Password"
-          value={password}
-          secureTextEntry={true}
-          onChangeText={(text) => setPassword(text)}
-        />
-        <Pressable style={styles.button}>
-          <Text style={styles.text} onPress={signInWithEmail}>
-            Sign In
+      <View style={styles.row}>
+        <Pressable
+          onPress={signInWithGoogle}
+          style={[styles.button, { backgroundColor: "white" }]}
+        >
+          <Image
+            source={require("../assets/icons/google-logo.png")}
+            style={{ width: 16, height: 16, marginRight: 5 }}
+          />
+          <Text
+            style={[
+              styles.text,
+              {
+                color: Dark.background,
+                fontFamily: "InterSemiBold",
+                letterSpacing: 0,
+              },
+            ]}
+          >
+            Continue with Google
           </Text>
         </Pressable>
-        <Pressable style={styles.button}>
-          <Text style={styles.text} onPress={signInWithGoogle}>
-            Google
+      </View>
+      {AppleAuthentication.isAvailableAsync() && (
+        <View style={styles.row}>
+          <AppleAuthentication.AppleAuthenticationButton
+            buttonType={
+              AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
+            }
+            buttonStyle={
+              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+            }
+            cornerRadius={5}
+            style={[styles.button, { backgroundColor: "transparent" }]}
+            onPress={signInWithApple}
+          />
+        </View>
+      )}
+      <View style={styles.row}>
+        <Text style={styles.text}>- or -</Text>
+      </View>
+      <TextInput
+        style={[styles.text, styles.loginInput]}
+        placeholder="Email..."
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+        keyboardType="email-address"
+      />
+      <TextInput
+        style={[styles.text, styles.loginInput]}
+        placeholder="Password..."
+        value={password}
+        secureTextEntry={true}
+        maxLength={20}
+        onChangeText={(text) => setPassword(text)}
+      />
+      <Pressable style={[styles.button, { backgroundColor: "#4286f4" }]}>
+        <Text
+          style={[styles.text, { color: "white" }]}
+          onPress={signInWithEmail}
+        >
+          Continue with Email
+        </Text>
+      </Pressable>
+      <View style={styles.row}>
+        <Text
+          style={[
+            styles.text,
+            {
+              fontSize: 14,
+              lineHeight: 23,
+              fontFamily: "PoppinsRegular",
+              color: Dark.secondary,
+            },
+          ]}
+        >
+          Don't have an account?{" "}
+        </Text>
+        <Pressable
+          onPress={() => {
+            navigation.navigate("Signup");
+          }}
+        >
+          <Text
+            style={[
+              styles.text,
+              {
+                fontSize: 14,
+                lineHeight: 23,
+                fontFamily: "PoppinsRegular",
+                color: Dark.info,
+              },
+            ]}
+          >
+            Sign up
           </Text>
         </Pressable>
       </View>
@@ -110,9 +183,17 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Dark.background,
+    backgroundColor: Dark.tertiary,
     alignItems: "flex-start",
     justifyContent: "flex-start",
+    flexDirection: "column",
+    paddingVertical: 20,
+  },
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
   },
   header: {
     flexDirection: "row",
@@ -127,32 +208,40 @@ const styles = StyleSheet.create({
     height: "50%",
     alignSelf: "center",
     marginVertical: 25,
-    borderRadius: 15,
+    borderRadius: 10,
+
+    justifyContent: "flex-start",
   },
   loginInput: {
-    backgroundColor: Dark.tertiary,
-    borderRadius: 10,
+    backgroundColor: Dark.background,
+    borderRadius: 5,
     margin: 10,
     marginBottom: 5,
     padding: 10,
     fontSize: 18,
-    lineHeight: 26,
+    borderWidth: 1,
+    width: "90%",
+    borderColor: Dark.quatrenary,
+    alignSelf: "center",
+    fontFamily: "Inter",
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
-    fontSize: 14,
-    lineHeight: 30,
+    fontFamily: "InterSemiBold",
+    fontSize: 16,
+    lineHeight: 22,
     color: Dark.primary,
   },
+
   button: {
-    backgroundColor: Dark.secondary,
     alignSelf: "center",
-    borderRadius: 10,
-    padding: 10,
-    paddingHorizontal: 20,
+    borderRadius: 5,
+    width: "90%",
+    height: 44,
     marginVertical: 10,
+    alignContent: "center",
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
 });
 

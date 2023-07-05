@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useContext } from "react";
 import { Dark } from "../lib/Theme";
 import {
   StyleSheet,
@@ -18,9 +18,12 @@ import NewNotebookModal from "../components/modals/NewNotebookModal";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { getStudySets, createStudySet } from "../dao/studySets";
-import { getSections, createSection } from "../dao/notebookSections";
+import { createSection } from "../dao/notebookSections";
 import { createNotes } from "../dao/notes";
+import { AuthContext } from "../provider/AuthProvider";
+import { useNotesDispatch } from "../provider/NotesProvider";
+import { useNotebooks } from "../provider/NotebookProvider";
+import { useSections, useSectionsDispatch } from "../provider/SectionsProvider";
 
 if (
   Platform.OS === "android" &&
@@ -30,23 +33,13 @@ if (
 }
 
 const NotesScreen = ({ navigation, route }) => {
-  const { user } = route.params;
-  const [studySets, setStudySets] = useState([]);
+  const { notes } = route.params;
+  const { session, user } = useContext(AuthContext);
+  const notebooksContext = useNotebooks();
+  const sectionsContext = useSections();
+  const sectionsDispatch = useSectionsDispatch();
+  const notesDispatch = useNotesDispatch();
   const [sections, setSections] = useState([]);
-  const notes = [
-    {
-      text: "Lactic acid fermentation occurs in certain fungi, bacteria, and muscle cells.",
-      question: "Where are some places that lactic acid fermentation occurs?",
-      answer: "Certain fungi, bacteria, and muscle cells.",
-    },
-    {
-      text: "When human muscle cells undergo strenuous activity, there is insufficient oxygen for aerobic cellular respiration, so the cells will produce ATP through fermentation.",
-      question: "Why do human muscle cells undergo lactic acid fermentation?",
-      answer:
-        "To produce ATP when there is insufficient oxygen for aerobic cellular respiration.",
-    },
-  ];
-
   const [showModal, setShowModal] = useState(false);
   const [showNewNotebookModal, setShowNewNotebookModal] = useState(false);
   const [showSelectSectionModal, setShowSelectSectionModal] = useState(false);
@@ -59,25 +52,12 @@ const NotesScreen = ({ navigation, route }) => {
   const [darken, setDarken] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // get notebooks
-  useEffect(() => {
-    async function fetchData() {
-      const sets = await getStudySets(user.id);
-      setStudySets(sets ? sets : []);
-    }
-    fetchData();
-  }, [emitRefresh]);
-
   // get notebook sections
   useEffect(() => {
-    async function fetchData() {
-      const sects = selectedNotebook
-        ? await getSections(selectedNotebook.id)
-        : null;
-      setSections(sects ? sects : []);
-    }
-    fetchData();
-  }, [emitRefresh]);
+    setSections(
+      sectionsContext.filter((s) => s.notebook_id === selectedNotebook?.id)
+    );
+  }, [emitRefresh, selectedNotebook]);
 
   useEffect(() => {
     if (darken) {
@@ -98,13 +78,18 @@ const NotesScreen = ({ navigation, route }) => {
   // create new section and add notes to it
   const handleAddToNewSection = async (notes) => {
     try {
-      const section = await createSection(newSectionName, selectedNotebook.id);
+      const section = await createSection(newSectionName, selectedNotebook?.id);
+      sectionsDispatch({
+        type: "added",
+        ...section,
+      });
       // assign notes to section
       const sectionNotes = notes.map((note) => {
         note.section_id = section.id;
         return note;
       });
-      await createNotes(sectionNotes);
+      const createdNotes = await createNotes(sectionNotes);
+      notesDispatch({ type: "bulkAdded", notes: createdNotes });
       navigation.goBack();
     } catch (e) {
       console.log(e);
@@ -119,7 +104,8 @@ const NotesScreen = ({ navigation, route }) => {
         note.section_id = section.id;
         return note;
       });
-      await createNotes(sectionNotes);
+      const response = await createNotes(sectionNotes);
+      notesDispatch({ type: "bulkAdded", notes: response });
       setDarken(false);
       navigation.goBack();
     } catch (e) {
@@ -131,7 +117,7 @@ const NotesScreen = ({ navigation, route }) => {
     return <NoteBlock noteText={data.text} key={index} />;
   });
 
-  const notebooks = studySets.map((data, index) => {
+  const notebooks = notebooksContext.map((data, index) => {
     return (
       <Pressable
         key={index}
@@ -202,6 +188,7 @@ const NotesScreen = ({ navigation, route }) => {
       style={{
         backgroundColor: Dark.background,
         borderRadius: 25,
+        paddingBottom: 25,
       }}
     >
       <Animated.View
