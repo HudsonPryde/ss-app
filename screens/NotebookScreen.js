@@ -1,41 +1,22 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Dark } from "../lib/Theme";
-import {
-  StyleSheet,
-  Text,
-  View,
-  ScrollView,
-  TextInput,
-  Pressable,
-  LayoutAnimation,
-  UIManager,
-} from "react-native";
+import { StyleSheet, Text, View, TextInput, Pressable } from "react-native";
 import Animated, {
   Layout,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-  SlideInRight,
   SlideOutRight,
+  FadeIn,
+  FadeOut,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
-import {
-  removeSection,
-  getSections,
-  createSection,
-} from "../dao/notebookSections";
+import { createSection } from "../dao/notebookSections";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import NotebookSection from "../components/NotebookSection";
 import { useNotebooks } from "../provider/NotebookProvider";
 import { useSections, useSectionsDispatch } from "../provider/SectionsProvider";
-
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
 
 const NotebookScreen = () => {
   const route = useRoute();
@@ -69,7 +50,6 @@ const NotebookScreen = () => {
   async function handleAddSection() {
     try {
       const section = await createSection(newSectionName, id);
-      // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
       dispatch({ type: "added", ...section });
       setAddSectionPressed(!addSectionPressed);
       setNewSectionName("");
@@ -79,10 +59,12 @@ const NotebookScreen = () => {
   }
 
   const newSectionComponent = (
-    <View
+    <Animated.View
       style={{
         alignSelf: "center",
       }}
+      entering={FadeIn}
+      exiting={FadeOut}
     >
       <View style={styles.sectionContainer}>
         <View
@@ -94,7 +76,7 @@ const NotebookScreen = () => {
           }}
         >
           <MaterialIcons
-            name={"folder-outline"}
+            name={"folder"}
             size={28}
             color={Dark.secondary}
             style={{ paddingHorizontal: 15 }}
@@ -118,14 +100,10 @@ const NotebookScreen = () => {
           ></TextInput>
         </View>
         <View>
-          <MaterialIcons
-            name={"dots-horizontal"}
-            size={22}
-            color={Dark.secondary}
-          />
+          <MaterialIcons name={"more-horiz"} size={22} color={Dark.secondary} />
         </View>
       </View>
-    </View>
+    </Animated.View>
   );
 
   const notebookSection = (data) => {

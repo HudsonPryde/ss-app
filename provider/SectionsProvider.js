@@ -11,7 +11,7 @@ const SectionsDispatchContext = createContext(null);
 export function SectionsProvider({ children }) {
   const { user } = useContext(AuthContext);
   const notebooks = useNotebooks();
-  const [sections, dispatch] = useReducer(sectionsReducer, []);
+  const [sections, dispatch] = useReducer(sectionsReducer, null);
 
   useEffect(() => {
     async function fetchData() {

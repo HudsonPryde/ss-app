@@ -46,27 +46,28 @@ const MainScreen = ({ navigation }) => {
   const [showUserOptions, setShowUserOptions] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  useEffect(() => {
-    const init = async () => {
-      AdsConsent.reset();
-      const consentInfo = await AdsConsent.requestInfoUpdate({
-        // debugGeography: AdsConsentDebugGeography.EEA,
-        testDeviceIdentifiers: ["3C09332C-6CE7-4442-A9B4-0C9106076F74"],
-      });
-      // if (
-      //   consentInfo.isConsentFormAvailable &&
-      //   consentInfo.status === AdsConsentStatus.REQUIRED
-      // ) {
-      //   const { status } = await AdsConsent.showForm();
-      //   console.log(status);
-      // }
-      // const { storeAndAccessInformationOnDevice } =
-      //   await AdsConsent.getUserChoices();
-      // console.log(consentInfo, storeAndAccessInformationOnDevice);
-    };
+  // useEffect(() => {
+  //   const init = async () => {
+  //     AdsConsent.reset();
+  //     const consentInfo = await AdsConsent.requestInfoUpdate({
+  //       // debugGeography: AdsConsentDebugGeography.EEA,
+  //       testDeviceIdentifiers: ["3C09332C-6CE7-4442-A9B4-0C9106076F74"],
+  //     });
+  //     // if (
+  //     //   consentInfo.isConsentFormAvailable &&
+  //     //   consentInfo.status === AdsConsentStatus.REQUIRED
+  //     // ) {
+  //     //   const { status } = await AdsConsent.showForm();
+  //     //   console.log(status);
+  //     // }
+  //     // const { storeAndAccessInformationOnDevice } =
+  //     //   await AdsConsent.getUserChoices();
+  //     // console.log(consentInfo, storeAndAccessInformationOnDevice);
+  //   };
 
-    init();
-  }, []);
+  //   init();
+  //   console.log(notebooks);
+  // }, []);
 
   useEffect(() => {
     if (darken) {
@@ -92,7 +93,13 @@ const MainScreen = ({ navigation }) => {
 
   const noteSets = notebooks.map((data, index) => {
     return (
-      <View key={index} style={{ marginBottom: 15 }}>
+      <View
+        key={index}
+        style={{ marginBottom: 15 }}
+        onLayout={() => {
+          "Notebook rendered";
+        }}
+      >
         <Notebook
           id={data.id}
           triggerModal={(id) => handleNotebookOptions(id)}

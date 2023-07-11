@@ -9,11 +9,12 @@ const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const getSession = async () => {
-      await supabase.auth.getSession().then((data) => {
-        const session = data ? data.session : null;
-        setSession(session);
-        setUser(session ? true : false);
-      });
+      // await supabase.auth.getSession().then((data) => {
+      //   const session = data ? data.session : null;
+      //   console.log("get session: ", session);
+      //   setSession(session);
+      //   setUser(session ? session.user : false);
+      // });
 
       supabase.auth.onAuthStateChange((_event, session) => {
         setSession(session);

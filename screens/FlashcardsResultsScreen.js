@@ -18,7 +18,6 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
         )
       : 100;
   useEffect(() => {
-    console.log(notebook, totalCards, incorrectCards);
     setAllCards(totalCards);
     setMissedCards(incorrectCards);
     setNotebookColor(notebook.colour);

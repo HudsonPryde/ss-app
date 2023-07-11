@@ -9,6 +9,7 @@
     "scheme": "com.hudsonpryde.ssapp",
     "originalFullName": "@hudsonpryde/ss-app",
     "backgroundColor": "#101010",
+    "jsEngine": "hermes",
     "plugins": [
       "@react-native-voice/voice",
       "@react-native-google-signin/google-signin",
@@ -16,6 +17,14 @@
         "expo-av",
         {
           "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone."
+        }
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "kotlinVersion": "1.6.10"
+          }
         }
       ]
     ],
@@ -55,7 +64,11 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#000000"
       },
-      "package": "com.hudsonpryde.ssapp"
+      "package": "com.hudsonpryde.ssapp",
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

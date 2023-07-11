@@ -221,7 +221,7 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
             <Text
               style={[styles.optionsText, { marginLeft: 15, lineHeight: 20 }]}
             >
-              Ebony
+              Gray
             </Text>
           </Pressable>
           <Pressable

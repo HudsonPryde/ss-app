@@ -31,10 +31,10 @@ const Navigation = () => {
   });
 
   const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded) {
+    if (fontsLoaded && user != null) {
       await SplashScreen.hideAsync();
     }
-  }, [fontsLoaded]);
+  }, [fontsLoaded, user]);
 
   if (!fontsLoaded) {
     return null;
@@ -50,7 +50,6 @@ const Navigation = () => {
       theme={{ colors: { background: "transparent" } }}
       style={{ backgroundColor: "black" }}
     >
-      {user == null && <Loading />}
       {user == false && <Auth />}
       {user && <MainTabs />}
     </NavigationContainer>

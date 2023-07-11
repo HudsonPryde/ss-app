@@ -224,7 +224,10 @@ const SectionNotesScreen = ({ route }) => {
           </Pressable>
         </View>
         <TextInput
-          style={[styles.text, { flex: 1, lineHeight: 23 }]}
+          style={[
+            styles.text,
+            { flex: 1, lineHeight: 23, textAlignVertical: "top" },
+          ]}
           autoFocus={true}
           placeholder="Enter note text"
           placeholderTextColor={Dark.secondary}

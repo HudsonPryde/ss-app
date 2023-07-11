@@ -70,7 +70,6 @@ const NotebookScreen = ({ route, navigation }) => {
       currentCard.times_incorrect += 1;
       setIncorrectCards([...incorrectCards, currentCard]);
     }
-    console.log(currentCard);
     setAnsweredCards([...answeredCards, currentCard]);
   };
 

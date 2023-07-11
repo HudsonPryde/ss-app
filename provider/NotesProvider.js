@@ -54,7 +54,6 @@ function notesReducer(notes, action) {
       return action.notes;
     }
     case "added": {
-      console.log(action);
       return [
         {
           id: action.id,

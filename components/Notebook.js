@@ -17,14 +17,15 @@ const Notebook = ({ id, triggerModal }) => {
 
   useEffect(() => {
     // count the number of sections in the notebook
+    if (!sections) return;
     const count = sections?.filter(
       (section) => section.notebook_id === id
     ).length;
     setSectionCount(count);
-  }, [notebooks, sections]);
+  }, [sections]);
 
   // dont render the notebook until the section count is known
-  if (!sectionCount) {
+  if (sectionCount === null) {
     return null;
   }
 

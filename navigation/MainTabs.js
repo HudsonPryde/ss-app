@@ -31,8 +31,6 @@ const MainTabs = () => {
         tabBarShowLabel: false,
         tabBarStyle: {
           backgroundColor: "#101010",
-          paddingTop: 5,
-          paddingBottom: 35,
           borderTopWidth: 2,
           borderTopColor: "#212121",
         },

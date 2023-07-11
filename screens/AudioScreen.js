@@ -119,6 +119,7 @@ const AudioScreen = ({ navigation, route }) => {
   }, [totalResults, currentResults]);
 
   Voice.onSpeechResults = (e) => {
+    console.log(e);
     setCurrentResults(e.value);
   };
 
@@ -138,8 +139,8 @@ const AudioScreen = ({ navigation, route }) => {
   async function handleCreateNotes() {
     setIsRecording(false);
     setLoading(true);
-    // const notes = await createNotes(text);
-    const notes = ["note 1", "note 2", "note 3"];
+    const notes = await createNotes(text);
+    // const notes = ["note 1", "note 2", "note 3"];
     // after creation format strings into objects
     const formattedNotes = notes.map((note) => {
       return {
@@ -175,7 +176,6 @@ const AudioScreen = ({ navigation, route }) => {
           style={styles.micButton}
           disabled={text.length >= 4000}
           onPress={() => {
-            console.log(totalResults, currentResults);
             setIsRecording(!isRecording);
           }}
         >
@@ -250,7 +250,6 @@ const AudioScreen = ({ navigation, route }) => {
             style={styles.editButton}
             onPress={() => {
               setIsRecording(false);
-              console.log(totalResults, currentResults, text);
               handleEdit();
             }}
           >
@@ -382,7 +381,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
+    padding: 15,
   },
   loadingBox: {
     height: 150,

@@ -5,6 +5,7 @@ import {
   TextInput,
   ScrollView,
   KeyboardAvoidingView,
+  Platform,
   Text,
   TouchableOpacity,
   Modal,
@@ -14,6 +15,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { createNotes } from "../lib/api/textProcess";
 import { ProgressBar } from "react-native-paper";
 import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const ScannedTextScreen = ({ navigation, route }) => {
   const { initText } = route.params;
@@ -41,8 +43,8 @@ const ScannedTextScreen = ({ navigation, route }) => {
 
   async function handleCreateNotes() {
     setLoading(true);
-    // const notes = await createNotes(text);
-    const notes = ["note 1", "note 2", "note 3"];
+    const notes = await createNotes(text);
+    // const notes = ["note 1", "note 2", "note 3"];
     // after creation format strings into objects
     const formattedNotes = notes.map((note) => {
       return {
@@ -86,10 +88,13 @@ const ScannedTextScreen = ({ navigation, route }) => {
   );
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView
       style={styles.container}
-      behavior="padding"
-      keyboardVerticalOffset={50}
+      edges={
+        Platform.OS === "ios"
+          ? ["left", "right", "bottom"]
+          : ["left", "right", "bottom", "top"]
+      }
     >
       <View style={styles.header}>
         <TouchableOpacity
@@ -108,24 +113,29 @@ const ScannedTextScreen = ({ navigation, route }) => {
           <Text style={[styles.text, { color: Dark.info }]}>Make notes</Text>
         </TouchableOpacity>
       </View>
-      <ScrollView
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.scrollContainer}
-        scrollEnabled={true}
-        stickyHeaderIndices={[0]}
-        keyboardShouldPersistTaps="handled"
       >
-        {scrollHeader}
-        <TextInput
-          style={styles.textInput}
-          multiline={true}
-          value={text}
-          scrollEnabled={false}
-          onChangeText={(text) => setText(text)}
-          placeholder="Your scanned text will show up here..."
-          placeholderTextColor={Dark.secondary}
-          autoCorrect={false}
-        />
-      </ScrollView>
+        <ScrollView
+          scrollEnabled={true}
+          stickyHeaderIndices={[0]}
+          keyboardShouldPersistTaps="handled"
+          style={styles.scrollContainer}
+        >
+          {scrollHeader}
+
+          <TextInput
+            style={styles.textInput}
+            multiline={true}
+            value={text}
+            onChangeText={(text) => setText(text)}
+            placeholder="Your scanned text will show up here..."
+            placeholderTextColor={Dark.secondary}
+            autoCorrect={false}
+          />
+        </ScrollView>
+      </KeyboardAvoidingView>
       {/* modal to display loading animation */}
       <Modal animationType="fade" transparent visible={loading}>
         <View style={[styles.modalContainer]}>
@@ -146,7 +156,7 @@ const ScannedTextScreen = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
-    </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -165,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: Dark.tertiary,
     paddingVertical: 5,
-    padding: 15,
+    paddingHorizontal: 15,
     alignSelf: "flex-end",
     marginHorizontal: 10,
   },

@@ -46,12 +46,10 @@ const LoginScreen = ({ navigation }) => {
       let res = await promptAsync({
         url: `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${req?.redirectUri}&prompt=select_account`,
       });
-      console.log(res);
       // After we got refresh token with the response, we can send it to supabase to sign-in the user
       const { data, error } = await supabase.auth.refreshSession({
         refresh_token: res.params.refresh_token,
       });
-      console.log({ data, error });
     } catch (error) {
       console.log(error);
     }
@@ -70,7 +68,6 @@ const LoginScreen = ({ navigation }) => {
         provider: "apple",
         token: credential.identityToken,
       });
-      console.log({ data, error });
     } catch (error) {
       console.log(error);
     }
