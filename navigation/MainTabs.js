@@ -12,6 +12,7 @@ const MainTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
+        lazy: false,
         tabBarIcon: ({ focused }) => {
           let iconName;
           let iconColor = focused ? "#D1D1D1" : "#858585";
@@ -36,7 +37,7 @@ const MainTabs = () => {
         },
       })}
     >
-      <Tab.Screen name="MainTab" component={MainNav} />
+      <Tab.Screen name="MainTab" component={MainNav} options={{}} />
       <Tab.Screen name="CameraTab" component={CameraNav} />
       <Tab.Screen name="SpeechTab" component={SpeechNav} />
     </Tab.Navigator>

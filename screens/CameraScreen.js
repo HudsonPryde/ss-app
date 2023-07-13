@@ -10,15 +10,9 @@ import {
   View,
   TouchableOpacity,
   Dimensions,
-  ScrollView,
   Text,
-  TextInput,
   Button,
-  Image,
   Platform,
-  Pressable,
-  Keyboard,
-  KeyboardAvoidingView,
   ActivityIndicator,
 } from "react-native";
 import Animated, {
@@ -27,14 +21,14 @@ import Animated, {
   useSharedValue,
   withTiming,
   runOnJS,
-  runOnUI,
 } from "react-native-reanimated";
 import { Dark, Notebook } from "../lib/Theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../provider/AuthProvider";
-import MlkitOcr, { MlkitOcrResult } from "react-native-mlkit-ocr";
+import MlkitOcr from "react-native-mlkit-ocr";
 
 SCREEN_HEIGHT = Dimensions.get("screen").height;
+SCREEN_WIDTH = Dimensions.get("screen").width;
 
 const CameraScreen = ({ navigation, route }) => {
   const { session, user } = useContext(AuthContext);
@@ -47,10 +41,9 @@ const CameraScreen = ({ navigation, route }) => {
   const [mediaPermision, requestMediaPermission] =
     ImagePicker.useMediaLibraryPermissions();
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
-  const [cameraLayout, setCameraLayout] = useState(0);
+  const [cameraLayout, setCameraLayout] = useState(null);
   const [showBoundings, setShowBoundings] = useState(false);
   const [scannedText, setScannedText] = useState("");
-  const scannedTextDrawerRef = useRef(null);
   const boxOpacity = useSharedValue(0);
   const scanBarPos = useSharedValue(SCREEN_HEIGHT);
 
@@ -170,6 +163,7 @@ const CameraScreen = ({ navigation, route }) => {
         <TouchableOpacity
           onPress={async () => {
             handleImageCapture();
+            // navigation.navigate("ImageCrop");
           }}
         >
           <MaterialIcons
@@ -254,112 +248,49 @@ const CameraScreen = ({ navigation, route }) => {
     </View>
   );
 
-  const textDrawer = (
-    <View style={[styles.textDrawer]}>
-      <View
-        style={{ flexDirection: "column", width: 20, justifyContent: "center" }}
-      >
-        <View
-          style={{
-            height: 45,
-            width: 5,
-            backgroundColor: Dark.primary,
-            borderRadius: 10,
-            alignSelf: "center",
-          }}
-        ></View>
-      </View>
-      <View
-        style={{
-          flexDirection: "column",
-          width: Dimensions.get("screen").width * 0.8,
-        }}
-      >
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignContent: "center",
-            height: 30,
-          }}
-        >
-          <View style={{ flex: 1, flexDirection: "row", alignSelf: "center" }}>
-            <Text style={[styles.header, { lineHeight: 20 }]}>
-              Scanned Text
-            </Text>
-            <Text
-              style={[
-                styles.text,
-                { color: Dark.secondary, marginLeft: 5, lineHeight: 18 },
-              ]}
-            >
-              {scannedText.length}/4000
-            </Text>
-          </View>
-          <Pressable
-            style={[styles.clearButton, { marginTop: 10, alignSelf: "center" }]}
-            onPress={() => {
-              setScannedText("");
-            }}
-          >
-            <Text
-              style={[styles.text, { color: Dark.tertiary, lineHeight: 18 }]}
-            >
-              clear
-            </Text>
-          </Pressable>
-        </View>
-        <KeyboardAvoidingView
-          keyboardVerticalOffset={140}
-          behavior="padding"
-          style={styles.textField}
-        >
-          <TextInput
-            multiline={true}
-            maxLength={4000}
-            textAlign="left"
-            textAlignVertical="top"
-            value={scannedText}
-            onBlur={Keyboard.dismiss}
-            onChangeText={(text) => setScannedText(text)}
-            style={[styles.text, { lineHeight: 20, padding: 10 }]}
-          ></TextInput>
-        </KeyboardAvoidingView>
-        <TouchableOpacity style={styles.makeNotesButton}>
-          <Text
-            style={[
-              styles.text,
-              {
-                color: Dark.primary,
-                lineHeight: 32,
-                fontSize: 18,
-                textAlign: "center",
-                fontFamily: "Poppins",
-              },
-            ]}
-          >
-            Generate notes
-          </Text>
-          <MaterialCommunityIcon
-            name={"arrow-right"}
-            size={25}
-            style={{ color: Dark.primary, marginLeft: 5 }}
-          />
-        </TouchableOpacity>
-      </View>
-    </View>
-  );
   if (!permission || !mediaPermision) {
     return null;
   }
+
   if (!permission.granted) {
     // Camera permissions are not granted yet
+    requestPermission();
     return (
-      <View style={styles.container}>
-        <Text style={{ textAlign: "center" }}>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          flexDirection: "column",
+          backgroundColor: Dark.tertiary,
+          padding: 15,
+        }}
+      >
+        <Text
+          style={{
+            color: Dark.primary,
+            textAlign: "center",
+            fontFamily: "inter",
+            fontSize: 18,
+          }}
+        >
           We need your permission to show the camera
         </Text>
-        <Button onPress={requestPermission} title="grant permission" />
+        <TouchableOpacity
+          style={{
+            padding: 15,
+            borderRadius: 15,
+            backgroundColor: Dark.info,
+            width: 200,
+            height: 50,
+            alignSelf: "center",
+            marginTop: 15,
+          }}
+          onPress={requestPermission}
+        >
+          <Text style={{ color: Dark.tertiary, textAlign: "center" }}>
+            Grant permission
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -376,28 +307,6 @@ const CameraScreen = ({ navigation, route }) => {
         {/* camera preview */}
 
         {topButtons}
-        {/* <ScrollView
-          ref={scannedTextDrawerRef}
-          horizontal
-          pagingEnabled
-          keyboardShouldPersistTaps="handled"
-          showsHorizontalScrollIndicator={false}
-          bounces={false}
-          keyboardDismissMode="on-drag"
-          style={{
-            paddingLeft: Dimensions.get("screen").width * 0.1,
-
-            width: "100%",
-            overflow: "visible",
-          }}
-          contentContainerStyle={{
-            flexDirection: "row",
-            alignItems: "flex-end",
-          }}
-        >
-          <View style={{ width: Dimensions.get("screen").width * 0.85 }}></View>
-          {textDrawer}
-        </ScrollView> */}
         {cameraButton}
       </SafeAreaView>
       {/* scan bar */}

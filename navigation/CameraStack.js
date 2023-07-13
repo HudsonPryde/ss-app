@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CameraScreen from "../screens/CameraScreen";
 import ScannedTextScreen from "../screens/ScannedTextScreen";
 import NotesScreen from "../screens/NotesScreen";
+import CropScreen from "../screens/CropScreen";
 
 const CameraStack = createNativeStackNavigator();
 const CameraNav = () => {
@@ -27,6 +28,14 @@ const CameraNav = () => {
         <CameraStack.Screen name="ScannedText" component={ScannedTextScreen} />
       </CameraStack.Group>
       <CameraStack.Screen name="CameraNotes" component={NotesScreen} />
+      <CameraStack.Screen
+        name="ImageCrop"
+        component={CropScreen}
+        options={{
+          presentation: "fullScreenModal",
+          animation: "slide_from_right",
+        }}
+      />
     </CameraStack.Navigator>
   );
 };

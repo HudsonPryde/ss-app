@@ -8,6 +8,7 @@ import {
   Dimensions,
   Modal,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -28,7 +29,7 @@ const screenHeight = Dimensions.get("screen").height;
 const AudioScreen = ({ navigation, route }) => {
   const { initText } = route.params;
   const [isRecording, setIsRecording] = useState(false);
-  const [permission, setPermission] = Audio.usePermissions();
+  const [permission, requestPermission] = Audio.usePermissions();
   const [currentResults, setCurrentResults] = useState([]);
   const [totalResults, setTotalResults] = useState([]);
   const [text, setText] = useState("");
@@ -169,6 +170,50 @@ const AudioScreen = ({ navigation, route }) => {
       opacity: opacity,
     };
   });
+
+  if (!permission?.granted) {
+    // Mic permissions are not granted yet
+    requestPermission();
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          flexDirection: "column",
+          backgroundColor: Dark.tertiary,
+          padding: 15,
+        }}
+      >
+        <Text
+          style={{
+            color: Dark.primary,
+            textAlign: "center",
+            fontFamily: "inter",
+            fontSize: 18,
+          }}
+        >
+          We need your permission to use your microphone
+        </Text>
+        <TouchableOpacity
+          style={{
+            padding: 15,
+            borderRadius: 15,
+            backgroundColor: Dark.info,
+            width: 200,
+            height: 50,
+            alignSelf: "center",
+            marginTop: 15,
+          }}
+          onPress={requestPermission}
+        >
+          <Text style={{ color: Dark.tertiary, textAlign: "center" }}>
+            Grant permission
+          </Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
       <Animated.View style={styles.micContainer} opacity={loading ? 0.5 : 1}>
