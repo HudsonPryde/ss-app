@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useContext } from "react";
 import { Camera, CameraType } from "expo-camera";
 import * as ImagePicker from "expo-image-picker";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import {
@@ -21,19 +20,22 @@ import Animated, {
   useSharedValue,
   withTiming,
   runOnJS,
+  interpolate,
 } from "react-native-reanimated";
 import { Dark, Notebook } from "../lib/Theme";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../provider/AuthProvider";
 import MlkitOcr from "react-native-mlkit-ocr";
+import CropScreen from "./CropScreen";
 
-SCREEN_HEIGHT = Dimensions.get("screen").height;
-SCREEN_WIDTH = Dimensions.get("screen").width;
+SCREEN_HEIGHT = Dimensions.get("window").height;
+SCREEN_WIDTH = Dimensions.get("window").width;
 
 const CameraScreen = ({ navigation, route }) => {
   const { session, user } = useContext(AuthContext);
   const { initText } = route.params;
   const [loading, setLoading] = useState(false);
+  const [cameraReady, setCameraReady] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
   const [currentBoundingBoxes, setCurrentBoundingBoxes] = useState([]);
   const cameraRef = useRef(null);
@@ -44,24 +46,21 @@ const CameraScreen = ({ navigation, route }) => {
   const [cameraLayout, setCameraLayout] = useState(null);
   const [showBoundings, setShowBoundings] = useState(false);
   const [scannedText, setScannedText] = useState("");
-  const boxOpacity = useSharedValue(0);
-  const scanBarPos = useSharedValue(SCREEN_HEIGHT);
+  const [emitScan, setEmitScan] = useState(false);
+
+  const [cropLayout, setCropLayout] = useState({
+    height: 0,
+    width: 0,
+    pageX: 0,
+    pageY: 0,
+  });
 
   // TODO: add bounding box animation to show what was scanned
 
   useEffect(() => {
+    console.log(initText);
     setScannedText(initText);
   }, [initText]);
-
-  const scanScreen = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: scanBarPos.value,
-        },
-      ],
-    };
-  });
 
   function fitWidth(value, imageWidth) {
     return (value / imageWidth) * cameraLayout.width;
@@ -72,35 +71,45 @@ const CameraScreen = ({ navigation, route }) => {
   }
 
   const handleImageCapture = async () => {
-    const res = await cameraRef.current.takePictureAsync();
-    const image = await ImageManipulator.manipulateAsync(res.uri, [], {
-      compress: 1,
-      format: "png",
-    });
+    setCameraReady(false);
+    setEmitScan(true);
     cameraRef.current.pausePreview();
+    const res = await cameraRef.current.takePictureAsync();
+    // find actual placement of crop on the image
+    // - 82 to account for bottom bar + border
+    const image = await ImageManipulator.manipulateAsync(
+      res.uri,
+      [
+        {
+          crop: {
+            height: (cropLayout.height / SCREEN_HEIGHT) * res.height,
+            originX: (cropLayout.pageX / SCREEN_WIDTH) * res.width,
+            originY: (cropLayout.pageY / (SCREEN_HEIGHT - 82)) * res.height,
+            width: (cropLayout.width / SCREEN_WIDTH) * res.width,
+          },
+        },
+      ],
+      {
+        compress: 1,
+        format: "png",
+      }
+    );
+
     const ocrResult = await MlkitOcr.detectFromUri(image.uri);
     setCurrentImage(image);
     setCurrentBoundingBoxes(ocrResult);
-    scanBarPos.value = withTiming(
-      -SCREEN_HEIGHT,
-      {
-        duration: 1000,
-        easing: Easing.linear,
-      },
-      () => {
-        runOnJS(handleImageCaptureResults)(ocrResult);
-      }
-    );
+    handleImageCaptureResults(ocrResult);
     // setShowBoundings(true);
     // Animated.stagger(1000, [fadeinBoxAnimation, fadeoutBoxAnimation]);
   };
 
   const handleImageCaptureResults = (ocrResult) => {
-    scanBarPos.value = 0;
     const text = retrieveScannedText(ocrResult);
+    setEmitScan(false);
     setScannedText(text);
     navigation.navigate("ScannedText", { initText: text });
     cameraRef.current.resumePreview();
+    setCameraReady(true);
   };
 
   const handleImageImport = async (image) => {
@@ -161,6 +170,7 @@ const CameraScreen = ({ navigation, route }) => {
         }}
       >
         <TouchableOpacity
+          disabled={!cameraReady}
           onPress={async () => {
             handleImageCapture();
             // navigation.navigate("ImageCrop");
@@ -198,52 +208,60 @@ const CameraScreen = ({ navigation, route }) => {
   const topButtons = (
     <View style={styles.row}>
       {/* container for flashlight and image library buttons */}
-      <View style={styles.pillConatiner}>
-        {/* Flash light toggle */}
-        <TouchableOpacity
-          onPress={() => {
-            if (flashMode === Camera.Constants.FlashMode.off) {
-              setFlashMode(Camera.Constants.FlashMode.torch);
-            } else {
-              setFlashMode(Camera.Constants.FlashMode.off);
-            }
-          }}
-        >
-          <MaterialIcon
-            name={
-              flashMode == Camera.Constants.FlashMode.off
-                ? "flash-off"
-                : "flash-on"
-            }
-            size={25}
-            style={{ color: "white" }}
-          />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.pillConatiner}>
-        {/* Media Library icon */}
-        <TouchableOpacity
-          onPress={async () => {
-            res = await ImagePicker.launchImageLibraryAsync({
-              allowsEditing: true,
-              allowsMultipleSelection: false,
-              quality: 1,
-            });
-            if (!res.canceled) {
-              const img = res.assets[0];
-              // after successful upload navigate to notes screen
-              handleImageImport(img);
-            }
-          }}
-        >
-          <MaterialIcon
-            name={"photo-library"}
-            size={25}
-            style={{
-              color: "white",
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          justifyContent: "center",
+        }}
+      >
+        <View style={styles.pillConatiner}>
+          {/* Flash light toggle */}
+          <TouchableOpacity
+            onPress={() => {
+              if (flashMode === Camera.Constants.FlashMode.off) {
+                setFlashMode(Camera.Constants.FlashMode.torch);
+              } else {
+                setFlashMode(Camera.Constants.FlashMode.off);
+              }
             }}
-          />
-        </TouchableOpacity>
+          >
+            <MaterialIcon
+              name={
+                flashMode == Camera.Constants.FlashMode.off
+                  ? "flash-off"
+                  : "flash-on"
+              }
+              size={25}
+              style={{ color: "white" }}
+            />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.pillConatiner}>
+          {/* Media Library icon */}
+          <TouchableOpacity
+            onPress={async () => {
+              res = await ImagePicker.launchImageLibraryAsync({
+                allowsEditing: true,
+                allowsMultipleSelection: false,
+                quality: 1,
+              });
+              if (!res.canceled) {
+                const img = res.assets[0];
+                // after successful upload navigate to notes screen
+                handleImageImport(img);
+              }
+            }}
+          >
+            <MaterialIcon
+              name={"photo-library"}
+              size={25}
+              style={{
+                color: "white",
+              }}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -296,6 +314,9 @@ const CameraScreen = ({ navigation, route }) => {
   }
   return (
     <Camera
+      onCameraReady={() => {
+        setCameraReady(true);
+      }}
       type={Camera.Constants.Type.back}
       ref={cameraRef}
       flashMode={flashMode}
@@ -305,17 +326,25 @@ const CameraScreen = ({ navigation, route }) => {
     >
       <SafeAreaView edges={["top", "left", "right"]} style={styles.camera}>
         {/* camera preview */}
-
         {topButtons}
+        <View
+          style={{
+            flex: 1,
+            zIndex: -1,
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <CropScreen
+            emitCropLayout={(crop) => {
+              setCropLayout(crop);
+            }}
+            startScan={emitScan}
+          />
+        </View>
         {cameraButton}
       </SafeAreaView>
-      {/* scan bar */}
-      <Animated.View
-        style={[
-          { height: 5, width: "100%", backgroundColor: Dark.info },
-          scanScreen,
-        ]}
-      ></Animated.View>
+
       {/* results image */}
       {showBoundings ? (
         <Animated.View

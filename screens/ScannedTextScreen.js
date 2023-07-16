@@ -16,6 +16,7 @@ import { createNotes } from "../lib/api/textProcess";
 import { ProgressBar } from "react-native-paper";
 import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { CommonActions } from "@react-navigation/native";
 
 const ScannedTextScreen = ({ navigation, route }) => {
   const { initText } = route.params;
@@ -71,7 +72,14 @@ const ScannedTextScreen = ({ navigation, route }) => {
       >
         <TouchableOpacity
           style={styles.pillConatiner}
-          onPress={() => setText("")}
+          onPress={() => {
+            setText("");
+            // navigation.dispatch({
+            //   ...CommonActions.setParams({ initText: "" }),
+            //   source: "Camera",
+            // });
+            // navigation.navigate("Camera", { initText: "" });
+          }}
         >
           <MaterialIcons
             name={"close"}

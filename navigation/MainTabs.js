@@ -34,6 +34,7 @@ const MainTabs = () => {
           backgroundColor: "#101010",
           borderTopWidth: 2,
           borderTopColor: "#212121",
+          height: 80,
         },
       })}
     >

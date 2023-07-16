@@ -1,6 +1,6 @@
 {
   "name": "ss-app",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "start": "expo start --dev-client",
     "android": "expo run:android",
@@ -12,7 +12,6 @@
     "@react-native-async-storage/async-storage": "~1.17.3",
     "@react-native-community/netinfo": "9.3.5",
     "@react-native-google-signin/google-signin": "^10.0.1",
-    "@react-native-masked-view/masked-view": "^0.2.8",
     "@react-native-voice/voice": "^3.2.4",
     "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/native": "^6.1.0",
