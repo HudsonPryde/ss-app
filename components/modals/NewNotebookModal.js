@@ -7,6 +7,7 @@ import {
   TextInput,
   Modal,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from "react-native";
 import { Dark, Notebook } from "../../lib/Theme";
 import { createStudySet } from "../../dao/studySets";
@@ -18,6 +19,7 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
   const [showModal, setShowModal] = useState(false);
   const [notebookName, setNotebookName] = useState("");
   const [selectedColour, setSelectedColour] = useState(Notebook.grape);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     setShowModal(visible);
@@ -25,9 +27,13 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
 
   const handleCreateNotebook = async ({ id, name, colour }) => {
     try {
+      setIsLoading(true);
       const notebook = await createStudySet(id, name, colour);
       dispatch({ type: "added", ...notebook });
-      onConfirm();
+
+      onConfirm(notebook);
+      setIsLoading(false);
+      setNotebookName("");
     } catch (error) {
       console.log(error);
     }
@@ -146,9 +152,11 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
             style={{ flexDirection: "row", justifyContent: "space-evenly" }}
           >
             <Pressable
+              disabled={isLoading}
               style={styles.optionButton}
               onPress={() => {
                 requestClose();
+                setNotebookName("");
               }}
             >
               <Text style={[styles.optionsText, { color: Dark.alert }]}>
@@ -156,6 +164,7 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
               </Text>
             </Pressable>
             <Pressable
+              disabled={isLoading}
               style={[
                 styles.optionButton,
                 { borderLeftColor: Dark.tertiary, borderLeftWidth: 3 },
@@ -168,7 +177,11 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
                 });
               }}
             >
-              <Text style={[styles.optionsText]}>Create</Text>
+              {!isLoading ? (
+                <Text style={[styles.optionsText]}>Create</Text>
+              ) : (
+                <ActivityIndicator size="small" color={Dark.primary} />
+              )}
             </Pressable>
           </View>
         </View>

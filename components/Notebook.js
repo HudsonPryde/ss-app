@@ -46,7 +46,13 @@ const Notebook = ({ id, triggerModal }) => {
             justifyContent: "space-between",
           }}
         >
-          <Text style={styles.text}>{name}</Text>
+          <Text
+            numberOfLines={1}
+            ellipsizeMode="tail"
+            style={[styles.text, { flex: 1 }]}
+          >
+            {name}
+          </Text>
           <Pressable onPress={() => triggerModal(id)} hitSlop={10}>
             <MaterialIcon name={"more-horiz"} size={25} color={"#FFFFF0"} />
           </Pressable>

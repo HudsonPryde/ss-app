@@ -4,6 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
+import { useScan, useScanDispatch } from "../provider/ScanProvider";
 import {
   StyleSheet,
   View,
@@ -27,13 +28,15 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { AuthContext } from "../provider/AuthProvider";
 import MlkitOcr from "react-native-mlkit-ocr";
 import CropScreen from "./CropScreen";
+import * as ScreenOrientation from "expo-screen-orientation";
 
 SCREEN_HEIGHT = Dimensions.get("window").height;
 SCREEN_WIDTH = Dimensions.get("window").width;
 
 const CameraScreen = ({ navigation, route }) => {
   const { session, user } = useContext(AuthContext);
-  const { initText } = route.params;
+  const scan = useScan();
+  const dispatch = useScanDispatch();
   const [loading, setLoading] = useState(false);
   const [cameraReady, setCameraReady] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
@@ -45,8 +48,16 @@ const CameraScreen = ({ navigation, route }) => {
   const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
   const [cameraLayout, setCameraLayout] = useState(null);
   const [showBoundings, setShowBoundings] = useState(false);
-  const [scannedText, setScannedText] = useState("");
   const [emitScan, setEmitScan] = useState(false);
+
+  useEffect(() => {
+    const unlock = async () => {
+      await ScreenOrientation.lockAsync(
+        ScreenOrientation.OrientationLock.PORTRAIT_UP
+      );
+    };
+    unlock();
+  }, []);
 
   const [cropLayout, setCropLayout] = useState({
     height: 0,
@@ -57,11 +68,6 @@ const CameraScreen = ({ navigation, route }) => {
 
   // TODO: add bounding box animation to show what was scanned
 
-  useEffect(() => {
-    console.log(initText);
-    setScannedText(initText);
-  }, [initText]);
-
   function fitWidth(value, imageWidth) {
     return (value / imageWidth) * cameraLayout.width;
   }
@@ -70,23 +76,43 @@ const CameraScreen = ({ navigation, route }) => {
     return (value / imageHeight) * cameraLayout.height;
   }
 
+  function getOrientation(exif) {
+    // determin landscape or portrait from exif data
+    if (exif.Orientation === -90 || exif.Orientation === 90) {
+      return "portrait";
+    } else {
+      return "landscape";
+    }
+  }
+
   const handleImageCapture = async () => {
     setCameraReady(false);
     setEmitScan(true);
     cameraRef.current.pausePreview();
-    const res = await cameraRef.current.takePictureAsync();
+    const res = await cameraRef.current.takePictureAsync({ exif: true });
+    const orientation = getOrientation(res.exif);
+    console.log(orientation);
+    const crop =
+      orientation === "portrait"
+        ? {
+            height: (cropLayout.height / SCREEN_HEIGHT) * res.height,
+            originX: (cropLayout.pageX / SCREEN_WIDTH) * res.width,
+            originY: (cropLayout.pageY / (SCREEN_HEIGHT - 82)) * res.height,
+            width: (cropLayout.width / SCREEN_WIDTH) * res.width,
+          }
+        : {
+            height: (cropLayout.width / SCREEN_WIDTH) * res.height,
+            originX: (cropLayout.pageY / SCREEN_WIDTH) * res.height,
+            originY: (cropLayout.pageX / (SCREEN_HEIGHT - 82)) * res.width,
+            width: (cropLayout.height / SCREEN_HEIGHT) * res.width,
+          };
     // find actual placement of crop on the image
     // - 82 to account for bottom bar + border
     const image = await ImageManipulator.manipulateAsync(
       res.uri,
       [
         {
-          crop: {
-            height: (cropLayout.height / SCREEN_HEIGHT) * res.height,
-            originX: (cropLayout.pageX / SCREEN_WIDTH) * res.width,
-            originY: (cropLayout.pageY / (SCREEN_HEIGHT - 82)) * res.height,
-            width: (cropLayout.width / SCREEN_WIDTH) * res.width,
-          },
+          crop: crop,
         },
       ],
       {
@@ -106,8 +132,8 @@ const CameraScreen = ({ navigation, route }) => {
   const handleImageCaptureResults = (ocrResult) => {
     const text = retrieveScannedText(ocrResult);
     setEmitScan(false);
-    setScannedText(text);
-    navigation.navigate("ScannedText", { initText: text });
+    dispatch({ type: "edited", scan: text });
+    navigation.navigate("ScannedText");
     cameraRef.current.resumePreview();
     setCameraReady(true);
   };
@@ -121,7 +147,7 @@ const CameraScreen = ({ navigation, route }) => {
   };
 
   const retrieveScannedText = (boxes) => {
-    let text = scannedText;
+    let text = scan;
     boxes.forEach((box) => {
       text += box.text + " ";
     });
@@ -188,7 +214,7 @@ const CameraScreen = ({ navigation, route }) => {
           {/* edit scanned text button */}
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("ScannedText", { initText: scannedText });
+              navigation.navigate("ScannedText");
             }}
           >
             <MaterialIcons
@@ -320,6 +346,10 @@ const CameraScreen = ({ navigation, route }) => {
       type={Camera.Constants.Type.back}
       ref={cameraRef}
       flashMode={flashMode}
+      responsiveOrientationWhenOrientationLocked={true}
+      onResponsiveOrientationChanged={(e) => {
+        console.log(e);
+      }}
       onLayout={(e) => {
         setCameraLayout(e.nativeEvent.layout);
       }}

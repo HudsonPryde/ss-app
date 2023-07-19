@@ -115,13 +115,17 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
           ></MaterialCommunityIcon>
           <TextInput
             returnKeyType="done"
+            maxLength={100}
             ref={notebookNameRef}
+            numberOfLines={1}
+            ellipsizeMode="tail"
             onChangeText={(text) =>
               setNotebookOptions({ ...notebookOptions, name: text })
             }
             style={[
               styles.optionsText,
               {
+                flex: 1,
                 marginLeft: 15,
                 fontSize: 20,
                 color: Dark.primary,

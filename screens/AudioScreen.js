@@ -23,6 +23,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Dark, Notebook } from "../lib/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
+import { ProgressBar, Snackbar } from "react-native-paper";
 
 const screenHeight = Dimensions.get("screen").height;
 
@@ -34,6 +35,7 @@ const AudioScreen = ({ navigation, route }) => {
   const [totalResults, setTotalResults] = useState([]);
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   const scale = useSharedValue(0);
   const wave = useSharedValue(0);
@@ -138,20 +140,26 @@ const AudioScreen = ({ navigation, route }) => {
   };
 
   async function handleCreateNotes() {
-    setIsRecording(false);
-    setLoading(true);
-    const notes = await createNotes(text);
-    // const notes = ["note 1", "note 2", "note 3"];
-    // after creation format strings into objects
-    const formattedNotes = notes.map((note) => {
-      return {
-        text: note,
-      };
-    });
-    setLoading(false);
-    navigation.navigate("Notes", {
-      notes: formattedNotes,
-    });
+    try {
+      setIsRecording(false);
+      setLoading(true);
+      const notes = await createNotes(text);
+      // const notes = ["note 1", "note 2", "note 3"];
+      // after creation format strings into objects
+      const formattedNotes = notes.map((note) => {
+        return {
+          text: note,
+        };
+      });
+      setLoading(false);
+      navigation.navigate("Notes", {
+        notes: formattedNotes,
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setApiError(true);
+    }
   }
 
   const textContainerStyle = useAnimatedStyle(() => {
@@ -343,15 +351,49 @@ const AudioScreen = ({ navigation, route }) => {
       </Animated.View>
       {/* modal to display loading animation */}
       <Modal animationType="fade" transparent visible={loading}>
-        <View style={[styles.container, { backgroundColor: "transparent" }]}>
+        <View style={[styles.modalContainer]}>
           <View style={styles.loadingBox}>
-            <ActivityIndicator size="large" color={Dark.primary} />
-            <Text style={[styles.text, { color: Dark.primary }]}>
-              Creating notes...
+            <Text
+              style={[
+                styles.text,
+                { color: Dark.primary, textAlign: "center" },
+              ]}
+            >
+              One moment generating notes...
             </Text>
+            <ProgressBar
+              indeterminate={true}
+              color={Dark.info}
+              style={{ width: 200, height: 5, marginVertical: 10 }}
+            />
           </View>
         </View>
       </Modal>
+      <Snackbar
+        visible={apiError}
+        onDismiss={() => {
+          setApiError(false);
+        }}
+        theme={{ colors: { background: Dark.alert } }}
+        style={{
+          backgroundColor: Dark.alert,
+          borderRadius: 10,
+          color: Dark.tertiary,
+        }}
+        duration={3000}
+        elevation={5}
+      >
+        <Text
+          style={{
+            color: Dark.tertiary,
+            textAlign: "center",
+            fontFamily: "inter",
+            fontSize: 18,
+          }}
+        >
+          Uh oh! Something went wrong. Please try again later.
+        </Text>
+      </Snackbar>
     </SafeAreaView>
   );
 };

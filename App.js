@@ -6,6 +6,7 @@ import { NotebooksProvider } from "./provider/NotebookProvider";
 import { SectionsProvider } from "./provider/SectionsProvider";
 import { NotesProvider } from "./provider/NotesProvider";
 import { FlashcardsProvider } from "./provider/FlashcardsProvider";
+import { ScanProvider } from "./provider/ScanProvider";
 
 export default function App() {
   return (
@@ -14,8 +15,10 @@ export default function App() {
         <SectionsProvider>
           <NotesProvider>
             <FlashcardsProvider>
-              <Navigation />
-              <StatusBar style={"light"} />
+              <ScanProvider>
+                <Navigation />
+                <StatusBar style={"light"} />
+              </ScanProvider>
             </FlashcardsProvider>
           </NotesProvider>
         </SectionsProvider>

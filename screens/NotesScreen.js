@@ -12,6 +12,8 @@ import {
   LayoutAnimation,
   UIManager,
   Animated,
+  ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import NoteBlock from "../components/NoteBlock";
 import NewNotebookModal from "../components/modals/NewNotebookModal";
@@ -42,6 +44,7 @@ const NotesScreen = ({ navigation, route }) => {
   const [sections, setSections] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [showNewNotebookModal, setShowNewNotebookModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showSelectSectionModal, setShowSelectSectionModal] = useState(false);
   const [showNewSectionModal, setShowNewSectionModal] = useState(false);
   const [newNotebookName, setNewNotebookName] = useState("");
@@ -78,6 +81,7 @@ const NotesScreen = ({ navigation, route }) => {
   // create new section and add notes to it
   const handleAddToNewSection = async (notes) => {
     try {
+      setIsLoading(true);
       const section = await createSection(newSectionName, selectedNotebook?.id);
       sectionsDispatch({
         type: "added",
@@ -93,6 +97,8 @@ const NotesScreen = ({ navigation, route }) => {
       navigation.goBack();
     } catch (e) {
       console.log(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -100,6 +106,7 @@ const NotesScreen = ({ navigation, route }) => {
   const handleAddToExistingSection = async (notes, section) => {
     try {
       // assign notes to section
+      setIsLoading(true);
       const sectionNotes = notes.map((note) => {
         note.section_id = section.id;
         return note;
@@ -110,6 +117,8 @@ const NotesScreen = ({ navigation, route }) => {
       navigation.goBack();
     } catch (e) {
       console.log(e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,7 +128,7 @@ const NotesScreen = ({ navigation, route }) => {
 
   const notebooks = notebooksContext.map((data, index) => {
     return (
-      <Pressable
+      <TouchableOpacity
         key={index}
         onPress={() => {
           setSelectedNotebook(data);
@@ -147,13 +156,13 @@ const NotesScreen = ({ navigation, route }) => {
         <Text style={[styles.text, { marginLeft: 15, fontSize: 20 }]}>
           {data.name}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     );
   });
 
   const notebookSections = sections.map((data, index) => {
     return (
-      <Pressable
+      <TouchableOpacity
         key={index}
         onPress={() => {
           handleAddToExistingSection(notes, data);
@@ -179,7 +188,7 @@ const NotesScreen = ({ navigation, route }) => {
         <Text style={[styles.text, { marginLeft: 15, fontSize: 18 }]}>
           {data.name}
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     );
   });
 
@@ -197,7 +206,7 @@ const NotesScreen = ({ navigation, route }) => {
       >
         <View style={styles.header}>
           {/* back button */}
-          <Pressable
+          <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={{ marginHorizontal: 10 }}
           >
@@ -206,7 +215,7 @@ const NotesScreen = ({ navigation, route }) => {
               size={42}
               color={Dark.secondary}
             ></MaterialCommunityIcon>
-          </Pressable>
+          </TouchableOpacity>
           {/* label for Notebook to add notes to */}
           <Pressable
             style={{
@@ -237,7 +246,7 @@ const NotesScreen = ({ navigation, route }) => {
             ></MaterialCommunityIcon>
           </Pressable>
           {/* add notes button */}
-          <Pressable
+          <TouchableOpacity
             style={{
               flex: 1,
               flexDirection: "row-reverse",
@@ -255,7 +264,7 @@ const NotesScreen = ({ navigation, route }) => {
               size={38}
               color={Dark.secondary}
             ></MaterialIcon>
-          </Pressable>
+          </TouchableOpacity>
         </View>
         <View style={styles.container}>
           <ScrollView>{notesList}</ScrollView>
@@ -273,7 +282,7 @@ const NotesScreen = ({ navigation, route }) => {
             ></Pressable>
             <View style={[styles.optionsModal]}>
               <ScrollView bounces={false}>
-                <Pressable
+                <TouchableOpacity
                   onPress={() => {
                     setShowModal(false);
                     setShowNewNotebookModal(true);
@@ -297,7 +306,7 @@ const NotesScreen = ({ navigation, route }) => {
                   <Text style={[styles.text, { marginLeft: 15, fontSize: 20 }]}>
                     New notebook
                   </Text>
-                </Pressable>
+                </TouchableOpacity>
                 {notebooks}
               </ScrollView>
             </View>
@@ -429,6 +438,7 @@ const NotesScreen = ({ navigation, route }) => {
                 style={{ flexDirection: "row", justifyContent: "space-evenly" }}
               >
                 <Pressable
+                  disabled={isLoading}
                   style={styles.optionButton}
                   onPress={() => {
                     setNewSectionName("");
@@ -441,6 +451,7 @@ const NotesScreen = ({ navigation, route }) => {
                   </Text>
                 </Pressable>
                 <Pressable
+                  disabled={isLoading}
                   style={[
                     styles.optionButton,
                     { borderLeftColor: Dark.tertiary, borderLeftWidth: 3 },
@@ -456,6 +467,11 @@ const NotesScreen = ({ navigation, route }) => {
           </KeyboardAvoidingView>
         </Modal>
       </Animated.View>
+      <Modal
+        visible={isLoading}
+        animationType="fade"
+        transparent={true}
+      ></Modal>
     </SafeAreaView>
   );
 };

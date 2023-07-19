@@ -19,11 +19,7 @@ const CameraNav = () => {
         },
       }}
     >
-      <CameraStack.Screen
-        name="Camera"
-        component={CameraScreen}
-        initialParams={{ initText: "" }}
-      />
+      <CameraStack.Screen name="Camera" component={CameraScreen} />
       <CameraStack.Group screenOptions={{ presentation: "modal" }}>
         <CameraStack.Screen name="ScannedText" component={ScannedTextScreen} />
       </CameraStack.Group>

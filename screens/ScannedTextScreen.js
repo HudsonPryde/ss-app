@@ -13,23 +13,31 @@ import {
 import { Dark } from "../lib/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { createNotes } from "../lib/api/textProcess";
-import { ProgressBar } from "react-native-paper";
+import { ProgressBar, Snackbar } from "react-native-paper";
 import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { CommonActions } from "@react-navigation/native";
+import { useScan, useScanDispatch } from "../provider/ScanProvider";
 
-const ScannedTextScreen = ({ navigation, route }) => {
-  const { initText } = route.params;
-  const [text, setText] = useState(initText);
+const ScannedTextScreen = ({ navigation }) => {
+  const scan = useScan();
+  const dispatch = useScanDispatch();
+  const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
+  const [apiError, setApiError] = useState(false);
 
   const Ad = useInterstitialAd(TestIds.INTERSTITIAL, {
     requestNonPersonalizedAdsOnly: true,
   });
 
   useEffect(() => {
+    if (scan) {
+      setText(scan);
+    }
+  }, [scan]);
+
+  useEffect(() => {
     Ad.load();
-  }, [Ad.load]);
+  }, [Ad.load, apiError]);
 
   useEffect(() => {
     if (Ad.isClosed) {
@@ -38,26 +46,28 @@ const ScannedTextScreen = ({ navigation, route }) => {
     }
   }, [Ad.isClosed, Ad.navigation]);
 
-  useEffect(() => {
-    setText(initText);
-  }, [initText]);
-
   async function handleCreateNotes() {
-    setLoading(true);
-    const notes = await createNotes(text);
-    // const notes = ["note 1", "note 2", "note 3"];
-    // after creation format strings into objects
-    const formattedNotes = notes.map((note) => {
-      return {
-        text: note,
-      };
-    });
-    setText("");
-    setLoading(false);
-    navigation.goBack();
-    navigation.navigate("CameraNotes", {
-      notes: formattedNotes,
-    });
+    try {
+      setLoading(true);
+      const notes = await createNotes(text);
+      // const notes = ["note 1", "note 2", "note 3"];
+      // after creation format strings into objects
+      const formattedNotes = notes.map((note) => {
+        return {
+          text: note,
+        };
+      });
+      dispatch({ type: "cleared" });
+      setLoading(false);
+      navigation.goBack();
+      navigation.navigate("CameraNotes", {
+        notes: formattedNotes,
+      });
+    } catch (error) {
+      console.log(error);
+      setLoading(false);
+      setApiError(true);
+    }
   }
 
   const scrollHeader = (
@@ -73,12 +83,8 @@ const ScannedTextScreen = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles.pillConatiner}
           onPress={() => {
-            setText("");
-            // navigation.dispatch({
-            //   ...CommonActions.setParams({ initText: "" }),
-            //   source: "Camera",
-            // });
-            // navigation.navigate("Camera", { initText: "" });
+            dispatch({ type: "cleared" });
+            navigation.navigate("Camera");
           }}
         >
           <MaterialIcons
@@ -106,7 +112,10 @@ const ScannedTextScreen = ({ navigation, route }) => {
     >
       <View style={styles.header}>
         <TouchableOpacity
-          onPress={() => navigation.navigate("Camera", { initText: text })}
+          onPress={() => {
+            dispatch({ type: "edited", scan: text });
+            navigation.navigate("Camera");
+          }}
         >
           <Text style={[styles.text, { color: Dark.primary }]}>Save</Text>
         </TouchableOpacity>
@@ -115,6 +124,8 @@ const ScannedTextScreen = ({ navigation, route }) => {
             // navigation.goBack();
             if (Ad.isLoaded) {
               Ad.show();
+            } else {
+              handleCreateNotes();
             }
           }}
         >
@@ -164,6 +175,31 @@ const ScannedTextScreen = ({ navigation, route }) => {
           </View>
         </View>
       </Modal>
+      <Snackbar
+        visible={apiError}
+        onDismiss={() => {
+          setApiError(false);
+        }}
+        theme={{ colors: { background: Dark.alert } }}
+        style={{
+          backgroundColor: Dark.alert,
+          borderRadius: 10,
+          color: Dark.tertiary,
+        }}
+        duration={3000}
+        elevation={5}
+      >
+        <Text
+          style={{
+            color: Dark.tertiary,
+            textAlign: "center",
+            fontFamily: "inter",
+            fontSize: 18,
+          }}
+        >
+          Uh oh! Something went wrong. Please try again later.
+        </Text>
+      </Snackbar>
     </SafeAreaView>
   );
 };
