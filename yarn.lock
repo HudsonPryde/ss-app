@@ -5048,6 +5048,11 @@ expo-status-bar@~1.4.2:
   resolved "https://registry.npmjs.org/expo-status-bar/-/expo-status-bar-1.4.2.tgz"
   integrity sha512-ZWjO6D4ARGYfAd3SWDD3STNudHDhyBZDZjhhseqoEmsf7bS9ykny8KKOhlzJW24qIQNPhkgdvHhaw9fQwMJy3Q==
 
+expo-tracking-transparency@~3.0.1:
+  version "3.0.3"
+  resolved "https://registry.yarnpkg.com/expo-tracking-transparency/-/expo-tracking-transparency-3.0.3.tgz#ed18aa32cdabca54dacc241bafdf38b3ba079c35"
+  integrity sha512-jM/wIEKGV6DlHKNcEWN39HRPosJhRcbCrmfgWVn5A3ILYsWWvM4pToKGz34BLmg/6iTsq+ONNzuQiwBxJJzbWA==
+
 expo-updates-interface@~0.8.0:
   version "0.8.1"
   resolved "https://registry.npmjs.org/expo-updates-interface/-/expo-updates-interface-0.8.1.tgz"

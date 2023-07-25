@@ -5,9 +5,10 @@ import { NavigationContainer } from "@react-navigation/native";
 import { useFonts } from "expo-font";
 import MainTabs from "./MainTabs";
 import Auth from "./AuthStack";
-import Loading from "../screens/LoadingScreen";
 import OfflineScreen from "../screens/OfflineScreen";
 import NetInfo from "@react-native-community/netinfo";
+
+SplashScreen.preventAutoHideAsync();
 
 const Navigation = () => {
   const [connected, setConnected] = useState(true);
@@ -46,11 +47,11 @@ const Navigation = () => {
 
   return (
     <NavigationContainer
-      onLayout={onLayoutRootView}
+      onReady={onLayoutRootView}
       theme={{ colors: { background: "transparent" } }}
       style={{ backgroundColor: "black" }}
     >
-      {user == false && <Auth />}
+      {user === false && <Auth />}
       {user && <MainTabs />}
     </NavigationContainer>
   );

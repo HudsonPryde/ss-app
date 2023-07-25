@@ -9,7 +9,6 @@ const Auth = () => {
   return (
     <AuthStack.Navigator
       initialRouteName="Login"
-      animation="slide_from_bottom"
       screenOptions={{
         headerShown: false,
         contentStyle: {
@@ -17,8 +16,22 @@ const Auth = () => {
         },
       }}
     >
-      <AuthStack.Screen name="Login" component={LoginScreen} />
-      <AuthStack.Screen name="Signup" component={SignupScreen} />
+      <AuthStack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={{
+          animationTypeForReplace: "push",
+          lazy: false,
+        }}
+      />
+      <AuthStack.Screen
+        name="Signup"
+        component={SignupScreen}
+        options={{
+          animationTypeForReplace: "push",
+          lazy: false,
+        }}
+      />
     </AuthStack.Navigator>
   );
 };

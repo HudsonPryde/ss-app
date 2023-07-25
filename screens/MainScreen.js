@@ -16,12 +16,11 @@ import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import Notebook from "../components/Notebook";
 import NotebookOptions from "../components/modals/NotebookOptions";
 import NewNotebookModal from "../components/modals/NewNotebookModal";
+import DeleteAccountModal from "../components/modals/DeleteAccountModal";
 import { supabase } from "../lib/initSupabase";
 import { AuthContext } from "../provider/AuthProvider";
 import { useNotebooks } from "../provider/NotebookProvider";
-import * as Google from "expo-auth-session/providers/google";
-import env from "../env";
-import { Prompt } from "expo-auth-session";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 import {
   AdsConsent,
   AdsConsentDebugGeography,
@@ -40,6 +39,7 @@ const MainScreen = ({ navigation }) => {
   const { user } = useContext(AuthContext);
   const [showNotebookOptions, setShowNotebookOptions] = useState(false);
   const [showNewNotebook, setShowNewNotebook] = useState(false);
+  const [showDeleteUser, setShowDeleteUser] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [darken, setDarken] = useState(false);
   const [selectedNotebook, setSelectedNotebook] = useState(null);
@@ -68,6 +68,11 @@ const MainScreen = ({ navigation }) => {
   //   init();
   //   console.log(notebooks);
   // }, []);
+  useEffect(() => {
+    (async () => {
+      await requestTrackingPermissionsAsync();
+    })();
+  }, []);
 
   useEffect(() => {
     if (darken) {
@@ -160,7 +165,7 @@ const MainScreen = ({ navigation }) => {
                 {user ? user.email : "Loading..."}
               </Text>
               <MaterialIcon
-                name={"unfold-more"}
+                name={showUserOptions ? "unfold-less" : "unfold-more"}
                 size={18}
                 color={"#858585"}
                 style={{ alignSelf: "center" }}
@@ -177,12 +182,14 @@ const MainScreen = ({ navigation }) => {
             >
               <Pressable
                 onPress={() => {
-                  supabase.auth.signOut();
+                  setDarken(true);
+                  setShowDeleteUser(true);
                 }}
                 style={[
                   {
                     height: 40,
-                    width: 200,
+                    flex: 1,
+                    marginHorizontal: 10,
                     flexDirection: "row",
                     justifyContent: "center",
                     alignItems: "center",
@@ -193,6 +200,28 @@ const MainScreen = ({ navigation }) => {
                 ]}
               >
                 <Text style={[styles.optionsText, { color: Dark.alert }]}>
+                  Delete account
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  supabase.auth.signOut();
+                }}
+                style={[
+                  {
+                    height: 40,
+                    flex: 1,
+                    marginHorizontal: 10,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderWidth: 0,
+                    backgroundColor: Dark.quatrenary,
+                    borderRadius: 15,
+                  },
+                ]}
+              >
+                <Text style={[styles.optionsText, { color: Dark.primary }]}>
                   Sign out
                 </Text>
               </Pressable>
@@ -243,6 +272,14 @@ const MainScreen = ({ navigation }) => {
           setShowNewNotebook(false);
           setDarken(false);
         }}
+      />
+      {/* Delete account modal */}
+      <DeleteAccountModal
+        requestClose={() => {
+          setShowDeleteUser(false);
+          setDarken(false);
+        }}
+        showModal={showDeleteUser}
       />
     </SafeAreaView>
   );

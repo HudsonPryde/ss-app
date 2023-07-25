@@ -26,7 +26,11 @@
             "kotlinVersion": "1.6.10"
           }
         }
-      ]
+      ],
+      "expo-tracking-transparency",
+      {
+        "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+      }
     ],
     "splash": {
       "image": "./assets/splash.png",

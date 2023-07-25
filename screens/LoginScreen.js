@@ -3,7 +3,7 @@ import {
   Alert,
   StyleSheet,
   View,
-  Pressable,
+  TouchableOpacity,
   Text,
   TextInput,
   Image,
@@ -76,7 +76,7 @@ const LoginScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>
-        <Pressable
+        <TouchableOpacity
           onPress={signInWithGoogle}
           style={[styles.button, { backgroundColor: "white" }]}
         >
@@ -96,7 +96,7 @@ const LoginScreen = ({ navigation }) => {
           >
             Continue with Google
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       {AppleAuthentication.isAvailableAsync() && (
         <View style={styles.row}>
@@ -131,14 +131,14 @@ const LoginScreen = ({ navigation }) => {
         maxLength={20}
         onChangeText={(text) => setPassword(text)}
       />
-      <Pressable style={[styles.button, { backgroundColor: "#4286f4" }]}>
-        <Text
-          style={[styles.text, { color: "white" }]}
-          onPress={signInWithEmail}
-        >
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: "#4286f4" }]}
+        onPress={signInWithEmail}
+      >
+        <Text style={[styles.text, { color: "white" }]}>
           Continue with Email
         </Text>
-      </Pressable>
+      </TouchableOpacity>
       <View style={styles.row}>
         <Text
           style={[
@@ -153,7 +153,7 @@ const LoginScreen = ({ navigation }) => {
         >
           Don't have an account?{" "}
         </Text>
-        <Pressable
+        <TouchableOpacity
           onPress={() => {
             navigation.navigate("Signup");
           }}
@@ -171,7 +171,7 @@ const LoginScreen = ({ navigation }) => {
           >
             Sign up
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
     </SafeAreaView>
   );
