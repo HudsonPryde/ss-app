@@ -28,10 +28,10 @@
         }
       ],
       [
-      "expo-tracking-transparency",
-      {
-        "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
-      }
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
+        }
       ]
     ],
     "splash": {
@@ -45,12 +45,6 @@
     "assetBundlePatterns": [
       "**/*"
     ],
-    "infoPlist": {
-      "NSCameraUsageDescription": "This app uses the camera to scan documents",
-      "NSMicrophoneUsageDescription": "This app uses the microphone to transcribe audio",
-      "NSPhotoLibraryUsageDescription": "This app uses the photo library to retrieve images",
-      "NSSpeechRecognitionUsageDescription": "This app uses speech recognition to convert your speech to text."
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hudsonpryde.ssapp",
@@ -63,7 +57,8 @@
             ]
           }
         ]
-      }
+      },
+      "buildNumber": "2"
     },
     "android": {
       "adaptiveIcon": {

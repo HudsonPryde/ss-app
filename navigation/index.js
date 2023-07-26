@@ -32,7 +32,7 @@ const Navigation = () => {
   });
 
   const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded && user != null) {
+    if (fontsLoaded && user !== null) {
       await SplashScreen.hideAsync();
     }
   }, [fontsLoaded, user]);
@@ -47,7 +47,7 @@ const Navigation = () => {
 
   return (
     <NavigationContainer
-      onReady={onLayoutRootView}
+      onLayout={onLayoutRootView}
       theme={{ colors: { background: "transparent" } }}
       style={{ backgroundColor: "black" }}
     >
