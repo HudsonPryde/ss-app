@@ -47,7 +47,10 @@ const Navigation = () => {
 
   return (
     <NavigationContainer
-      onLayout={onLayoutRootView}
+      onReady={() => {
+        console.log("on layout");
+        onLayoutRootView();
+      }}
       theme={{ colors: { background: "transparent" } }}
       style={{ backgroundColor: "black" }}
     >
