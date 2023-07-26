@@ -2,8 +2,8 @@
   "expo": {
     "name": "Study Scribe",
     "slug": "ss-app",
-    "version": "1.0.3",
-    "icon": "./assets/icon.png",
+    "version": "1.0.4",
+    "icon": "./assets/ss-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "scheme": "com.hudsonpryde.ssapp",
@@ -27,13 +27,15 @@
           }
         }
       ],
+      [
       "expo-tracking-transparency",
       {
         "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
       }
+      ]
     ],
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/ss-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#101010"
     },

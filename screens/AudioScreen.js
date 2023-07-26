@@ -105,12 +105,6 @@ const AudioScreen = ({ navigation, route }) => {
   }, [isRecording]);
 
   useEffect(() => {
-    if (permission?.status !== "granted") {
-      Audio.requestPermissionsAsync();
-    }
-  }, [permission]);
-
-  useEffect(() => {
     let displayText = "";
     if (totalResults.length > 0) {
       displayText = totalResults.join("\n\n") + "\n\n";
