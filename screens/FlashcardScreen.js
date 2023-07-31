@@ -16,7 +16,10 @@ import Animated, {
   set,
   runOnUI,
 } from "react-native-reanimated";
-import { PanGestureHandler } from "react-native-gesture-handler";
+import {
+  PanGestureHandler,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
@@ -279,67 +282,69 @@ const NotebookScreen = ({ route, navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={[styles.header, { borderBottomColor: notebookColour }]}>
-        {/* back button */}
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={{ marginHorizontal: 10 }}
-        >
-          <MaterialCommunityIcon
-            name={"chevron-left"}
-            size={42}
-            color={Dark.secondary}
-          ></MaterialCommunityIcon>
-        </Pressable>
-        <View>
-          <Text style={[styles.heading]}>{notebookName}</Text>
-        </View>
-      </View>
-      {!flashcardsDone && flashcardComponent}
-      {showNextCard && (
-        <View
-          style={[
-            styles.cardContainer,
-            {
-              width: 240,
-              height: 336,
-              marginTop: SCREEN_HEIGHT * 0.32,
-              position: "absolute",
-              zIndex: -1,
-              elevation: -1,
-            },
-          ]}
-        >
-          <View
-            style={[
-              styles.card,
-              { backgroundColor: Dark.tertiary, borderColor: Dark.tertiary },
-            ]}
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaView style={styles.container}>
+        <View style={[styles.header, { borderBottomColor: notebookColour }]}>
+          {/* back button */}
+          <Pressable
+            onPress={() => navigation.goBack()}
+            style={{ marginHorizontal: 10 }}
           >
-            <Text style={[styles.cardText, { fontSize: 15 }]}>
-              {
-                flashcards[
-                  backCardIndex > flashcards.length - 1
-                    ? cardIndex
-                    : backCardIndex
-                ].question
-              }
-            </Text>
+            <MaterialCommunityIcon
+              name={"chevron-left"}
+              size={42}
+              color={Dark.secondary}
+            ></MaterialCommunityIcon>
+          </Pressable>
+          <View>
+            <Text style={[styles.heading]}>{notebookName}</Text>
           </View>
         </View>
-      )}
-      {/* bottom buttons */}
-      <View style={styles.footer}>
-        <Pressable style={styles.undoButton} onPress={handleUndo}>
-          <MaterialIcon
-            name={"undo"}
-            size={42}
-            color={Dark.secondary}
-          ></MaterialIcon>
-        </Pressable>
-      </View>
-    </SafeAreaView>
+        {!flashcardsDone && flashcardComponent}
+        {showNextCard && (
+          <View
+            style={[
+              styles.cardContainer,
+              {
+                width: 240,
+                height: 336,
+                marginTop: SCREEN_HEIGHT * 0.32,
+                position: "absolute",
+                zIndex: -1,
+                elevation: -1,
+              },
+            ]}
+          >
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: Dark.tertiary, borderColor: Dark.tertiary },
+              ]}
+            >
+              <Text style={[styles.cardText, { fontSize: 15 }]}>
+                {
+                  flashcards[
+                    backCardIndex > flashcards.length - 1
+                      ? cardIndex
+                      : backCardIndex
+                  ].question
+                }
+              </Text>
+            </View>
+          </View>
+        )}
+        {/* bottom buttons */}
+        <View style={styles.footer}>
+          <Pressable style={styles.undoButton} onPress={handleUndo}>
+            <MaterialIcon
+              name={"undo"}
+              size={42}
+              color={Dark.secondary}
+            ></MaterialIcon>
+          </Pressable>
+        </View>
+      </SafeAreaView>
+    </GestureHandlerRootView>
   );
 };
 

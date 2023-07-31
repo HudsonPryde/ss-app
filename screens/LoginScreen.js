@@ -12,6 +12,7 @@ import { supabase } from "../lib/initSupabase";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Dark } from "../lib/Theme";
 import * as Google from "expo-auth-session/providers/google";
+// check if apple sign in is available
 import * as AppleAuthentication from "expo-apple-authentication";
 
 import env from "../env";
@@ -119,6 +120,7 @@ const LoginScreen = ({ navigation }) => {
       <TextInput
         style={[styles.text, styles.loginInput]}
         placeholder="Email..."
+        placeholderTextColor={Dark.secondary}
         value={email}
         onChangeText={(text) => setEmail(text)}
         keyboardType="email-address"
@@ -126,6 +128,7 @@ const LoginScreen = ({ navigation }) => {
       <TextInput
         style={[styles.text, styles.loginInput]}
         placeholder="Password..."
+        placeholderTextColor={Dark.secondary}
         value={password}
         secureTextEntry={true}
         maxLength={20}

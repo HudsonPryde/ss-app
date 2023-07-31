@@ -166,6 +166,8 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
           onPress={() => {
             if (Ad.isLoaded) {
               Ad.show();
+            } else {
+              handleSubmitOptions();
             }
           }}
         >

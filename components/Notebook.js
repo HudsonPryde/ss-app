@@ -69,7 +69,12 @@ const Notebook = ({ id, triggerModal }) => {
             <Text
               style={[
                 styles.text,
-                { color: "#121212", fontSize: 16, textAlign: "center" },
+                {
+                  color: "#121212",
+                  fontSize: 16,
+                  textAlign: "center",
+                  alignSelf: "center",
+                },
               ]}
             >
               {sectionCount}
@@ -99,6 +104,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     fontSize: 18,
     color: "#FFFFF0",
+    lineHeight: 23,
   },
   setCountPill: {
     backgroundColor: "#FFFFF0",

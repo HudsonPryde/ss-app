@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "600",
     fontSize: 24,
-    lineHeight: 32,
+    lineHeight: 27,
     marginBottom: 20,
     color: Dark.secondary,
   },
@@ -367,6 +367,8 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     marginLeft: 12,
+    flexDirection: "column",
+    justifyContent: "center",
   },
 });
 

@@ -55,6 +55,7 @@ const NewNotebookModal = ({ userId, visible, requestClose, onConfirm }) => {
           <TextInput
             autoFocus={true}
             style={[styles.optionsText, styles.nameInput]}
+            placeholderTextColor={Dark.secondary}
             placeholder={"Notebook Name"}
             value={notebookName}
             maxLength={40}
@@ -232,7 +233,8 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontWeight: "600",
     fontSize: 14,
-    lineHeight: 30,
+    lineHeight: 28,
+    textAlignVertical: "center",
     color: Dark.primary,
   },
   nameInput: {
