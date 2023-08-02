@@ -83,7 +83,11 @@ const LoginScreen = ({ navigation }) => {
         >
           <Image
             source={require("../assets/icons/google-logo.png")}
-            style={{ width: 16, height: 16, marginRight: 5 }}
+            style={{
+              width: 16,
+              height: 16,
+              marginRight: 5,
+            }}
           />
           <Text
             style={[
@@ -106,7 +110,7 @@ const LoginScreen = ({ navigation }) => {
               AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
             }
             buttonStyle={
-              AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+              AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
             }
             cornerRadius={5}
             style={[styles.button, { backgroundColor: "transparent" }]}
