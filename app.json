@@ -45,7 +45,8 @@
       "backgroundColor": "#101010"
     },
     "updates": {
-      "fallbackToCacheTimeout": 0
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/c50b2d11-714d-4e9c-8470-7f0d5b44b8ec"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -62,9 +63,13 @@
               "com.googleusercontent.apps.1089486777421-c5kth7j1vt2s6bem3286pfs1lb6t7ju8"
             ]
           }
-        ]
+        ],
+        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
       },
-      "buildNumber": "4"
+      "buildNumber": "5",
+      "runtimeVersion": {
+        "policy": "sdkVersion"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -74,9 +79,11 @@
       "package": "com.hudsonpryde.ssapp",
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.CAMERA"
       ],
-      "versionCode": 6
+      "versionCode": 6,
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "favicon": "./assets/favicon.png"
