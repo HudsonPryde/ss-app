@@ -21,11 +21,7 @@ import { supabase } from "../lib/initSupabase";
 import { AuthContext } from "../provider/AuthProvider";
 import { useNotebooks } from "../provider/NotebookProvider";
 import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
-import {
-  AdsConsent,
-  AdsConsentDebugGeography,
-  AdsConsentStatus,
-} from "react-native-google-mobile-ads";
+import { AdsConsent, AdsConsentStatus } from "react-native-google-mobile-ads";
 
 if (
   Platform.OS === "android" &&
@@ -46,32 +42,19 @@ const MainScreen = ({ navigation }) => {
   const [showUserOptions, setShowUserOptions] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // useEffect(() => {
-  //   const init = async () => {
-  //     AdsConsent.reset();
-  //     const consentInfo = await AdsConsent.requestInfoUpdate({
-  //       // debugGeography: AdsConsentDebugGeography.EEA,
-  //       testDeviceIdentifiers: ["3C09332C-6CE7-4442-A9B4-0C9106076F74"],
-  //     });
-  //     // if (
-  //     //   consentInfo.isConsentFormAvailable &&
-  //     //   consentInfo.status === AdsConsentStatus.REQUIRED
-  //     // ) {
-  //     //   const { status } = await AdsConsent.showForm();
-  //     //   console.log(status);
-  //     // }
-  //     // const { storeAndAccessInformationOnDevice } =
-  //     //   await AdsConsent.getUserChoices();
-  //     // console.log(consentInfo, storeAndAccessInformationOnDevice);
-  //   };
-
-  //   init();
-  //   console.log(notebooks);
-  // }, []);
   useEffect(() => {
-    (async () => {
+    const init = async () => {
+      const consentInfo = await AdsConsent.requestInfoUpdate();
       await requestTrackingPermissionsAsync();
-    })();
+      if (
+        consentInfo.isConsentFormAvailable &&
+        consentInfo.status === AdsConsentStatus.REQUIRED
+      ) {
+        const { status } = await AdsConsent.showForm();
+      }
+    };
+
+    init();
   }, []);
 
   useEffect(() => {

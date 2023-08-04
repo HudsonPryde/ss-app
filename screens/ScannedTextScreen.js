@@ -10,13 +10,20 @@ import {
   TouchableOpacity,
   Modal,
 } from "react-native";
+import env from "../env";
 import { Dark } from "../lib/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
 import { createNotes } from "../lib/api/textProcess";
 import { ProgressBar, Snackbar } from "react-native-paper";
-import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
+import {
+  useInterstitialAd,
+  TestIds,
+  AdsConsent,
+} from "react-native-google-mobile-ads";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useScan, useScanDispatch } from "../provider/ScanProvider";
+
+// const { selectBasicAds } = await AdsConsent.getUserChoices();
 
 const ScannedTextScreen = ({ navigation }) => {
   const scan = useScan();
@@ -24,9 +31,24 @@ const ScannedTextScreen = ({ navigation }) => {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
+  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
+  const adUnitId =
+    Platform.OS === "ios"
+      ? env.APPLE_CAMERA_AD_UNIT_ID
+      : env.ANDROID_CAMERA_AD_UNIT_ID;
 
-  const Ad = useInterstitialAd(TestIds.INTERSTITIAL, {
-    requestNonPersonalizedAdsOnly: true,
+  useEffect(() => {
+    async function getConsent() {
+      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
+      return selectPersonalisedAds;
+    }
+    getConsent().then((res) => {
+      setSelectPersonalisedAds(res);
+    });
+  }, []);
+
+  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
+    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
   });
 
   useEffect(() => {

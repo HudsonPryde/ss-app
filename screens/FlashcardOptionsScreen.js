@@ -8,6 +8,7 @@ import {
   Modal,
 } from "react-native";
 import { Dark } from "../lib/Theme";
+import env from "../env";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { createFlashcards } from "../lib/api/textProcess";
 import { bulkInsertFlashcards } from "../dao/flashcards";
@@ -17,7 +18,11 @@ import {
   useFlashcardsDispatch,
 } from "../provider/FlashcardsProvider";
 import { ProgressBar } from "react-native-paper";
-import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
+import {
+  useInterstitialAd,
+  TestIds,
+  AdsConsent,
+} from "react-native-google-mobile-ads";
 
 const FlashcardOptionsScreen = ({ navigation, route }) => {
   const { sections, notebook } = route.params;
@@ -28,9 +33,24 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
   const [sectionNotes, setSectionNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [flashcardGenProgress, setFlashcardGenProgress] = useState(0);
+  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
+  const adUnitId =
+    Platform.OS === "ios"
+      ? env.APPLE_FLASHCARD_AD_UNIT_ID
+      : env.ANDROID_FLASHCARD_AD_UNIT_ID;
 
-  const Ad = useInterstitialAd(TestIds.INTERSTITIAL, {
-    requestNonPersonalizedAdsOnly: true,
+  useEffect(() => {
+    async function getConsent() {
+      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
+      return selectPersonalisedAds;
+    }
+    getConsent().then((res) => {
+      setSelectPersonalisedAds(res);
+    });
+  }, []);
+
+  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
+    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
   });
 
   useEffect(() => {

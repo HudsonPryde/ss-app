@@ -9,22 +9,25 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Modal,
+  TouchableOpacity,
 } from "react-native";
 import Animated, {
   ZoomIn,
   ZoomOut,
   FadeIn,
   Layout,
-  set,
 } from "react-native-reanimated";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcon from "react-native-vector-icons/MaterialIcons";
 import { removeNotes, createNote } from "../dao/notes";
 import { useNotes, useNotesDispatch } from "../provider/NotesProvider";
+import { useFlashcards } from "../provider/FlashcardsProvider";
 import { TextInput } from "react-native-gesture-handler";
 
-const SectionNotesScreen = ({ route }) => {
+const SectionNotesScreen = ({ route, navigation }) => {
   const notes = useNotes();
+  const flashcards = useFlashcards();
   const dispatch = useNotesDispatch();
   const { sectionId, sectionName } = route.params;
   const [editMode, setEditMode] = useState(false);
@@ -223,19 +226,21 @@ const SectionNotesScreen = ({ route }) => {
             </Text>
           </Pressable>
         </View>
-        <TextInput
-          style={[
-            styles.text,
-            { flex: 1, lineHeight: 23, textAlignVertical: "top" },
-          ]}
-          autoFocus={true}
-          placeholder="Enter note text"
-          placeholderTextColor={Dark.secondary}
-          onChangeText={(text) => setNoteText(text)}
-          value={noteText}
-          multiline={true}
-          numberOfLines={4}
-        ></TextInput>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <TextInput
+            style={[
+              styles.text,
+              { flex: 1, lineHeight: 23, textAlignVertical: "top" },
+            ]}
+            autoFocus={true}
+            placeholder="Enter note text"
+            placeholderTextColor={Dark.secondary}
+            onChangeText={(text) => setNoteText(text)}
+            value={noteText}
+            multiline={true}
+            numberOfLines={4}
+          ></TextInput>
+        </GestureHandlerRootView>
       </SafeAreaView>
     </Modal>
   );
@@ -243,19 +248,21 @@ const SectionNotesScreen = ({ route }) => {
   return (
     <SafeAreaView
       style={styles.container}
-      edges={["bottom"]}
       opacity={darken ? 0.5 : 1}
+      edges={["top", "left", "right"]}
     >
-      <View
-        style={{
-          width: 100,
-          height: 5,
-          backgroundColor: Dark.primary,
-          borderRadius: 25,
-          marginVertical: 10,
-        }}
-      />
       <View style={styles.header}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.goBack();
+          }}
+        >
+          <MaterialIcon
+            size={28}
+            name={"chevron-left"}
+            color={Dark.secondary}
+          ></MaterialIcon>
+        </TouchableOpacity>
         <View
           style={{
             flexDirection: "row",
@@ -293,6 +300,7 @@ const SectionNotesScreen = ({ route }) => {
         )}
         {noteComponents}
       </ScrollView>
+
       {addNoteModal}
     </SafeAreaView>
   );
@@ -315,8 +323,8 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: "row",
-    paddingHorizontal: 15,
-    paddingVertical: 10,
+    // paddingHorizontal: 15,
+    paddingVertical: 15,
     elevation: 5,
     zIndex: 5,
     shadowColor: Dark.background,

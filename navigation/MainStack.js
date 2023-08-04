@@ -27,9 +27,7 @@ const MainNav = () => {
         component={NotebookScreen}
         options={{ lazy: false }}
       />
-      <MainStack.Group screenOptions={{ presentation: "modal" }}>
-        <MainStack.Screen name="SectionNotes" component={SectionNotesScreen} />
-      </MainStack.Group>
+      <MainStack.Screen name="SectionNotes" component={SectionNotesScreen} />
       <MainStack.Screen
         name="Flashcards"
         component={FlashcardScreen}

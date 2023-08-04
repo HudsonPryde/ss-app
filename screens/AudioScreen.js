@@ -17,12 +17,17 @@ import Animated, {
   withTiming,
   withRepeat,
 } from "react-native-reanimated";
+import env from "../env";
 import { Audio } from "expo-av";
 import Voice from "@react-native-voice/voice";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Dark, Notebook } from "../lib/Theme";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useInterstitialAd, TestIds } from "react-native-google-mobile-ads";
+import {
+  useInterstitialAd,
+  TestIds,
+  AdsConsent,
+} from "react-native-google-mobile-ads";
 import { ProgressBar, Snackbar } from "react-native-paper";
 
 const screenHeight = Dimensions.get("screen").height;
@@ -40,8 +45,24 @@ const AudioScreen = ({ navigation, route }) => {
   const scale = useSharedValue(0);
   const wave = useSharedValue(0);
 
-  const Ad = useInterstitialAd(TestIds.INTERSTITIAL, {
-    requestNonPersonalizedAdsOnly: true,
+  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
+  const adUnitId =
+    Platform.OS === "ios"
+      ? env.APPLE_AUDIO_AD_UNIT_ID
+      : env.ANDROID_AUDIO_AD_UNIT_ID;
+
+  useEffect(() => {
+    async function getConsent() {
+      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
+      return selectPersonalisedAds;
+    }
+    getConsent().then((res) => {
+      setSelectPersonalisedAds(res);
+    });
+  }, []);
+
+  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
+    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
   });
 
   useEffect(() => {
@@ -321,6 +342,8 @@ const AudioScreen = ({ navigation, route }) => {
             onPress={() => {
               if (Ad.isLoaded) {
                 Ad.show();
+              } else {
+                handleCreateNotes();
               }
             }}
           >
