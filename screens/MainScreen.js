@@ -45,7 +45,7 @@ const MainScreen = ({ navigation }) => {
   useEffect(() => {
     const init = async () => {
       const consentInfo = await AdsConsent.requestInfoUpdate();
-      await requestTrackingPermissionsAsync();
+
       if (
         consentInfo.isConsentFormAvailable &&
         consentInfo.status === AdsConsentStatus.REQUIRED
@@ -55,6 +55,12 @@ const MainScreen = ({ navigation }) => {
     };
 
     init();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      await requestTrackingPermissionsAsync();
+    })();
   }, []);
 
   useEffect(() => {
