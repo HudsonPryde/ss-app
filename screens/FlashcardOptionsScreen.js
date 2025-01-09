@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,23 +6,19 @@ import {
   Pressable,
   ScrollView,
   Modal,
-} from "react-native";
-import { Dark } from "../lib/Theme";
-import env from "../env";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { createFlashcards } from "../lib/api/textProcess";
-import { bulkInsertFlashcards } from "../dao/flashcards";
-import { useNotes } from "../provider/NotesProvider";
+  Platform,
+} from 'react-native';
+import { Dark } from '../lib/Theme';
+import env from '../env';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { createFlashcards } from '../lib/api/textProcess';
+import { bulkInsertFlashcards } from '../dao/flashcards';
+import { useNotes } from '../provider/NotesProvider';
 import {
   useFlashcards,
   useFlashcardsDispatch,
-} from "../provider/FlashcardsProvider";
-import { ProgressBar } from "react-native-paper";
-import {
-  useInterstitialAd,
-  TestIds,
-  AdsConsent,
-} from "react-native-google-mobile-ads";
+} from '../provider/FlashcardsProvider';
+import { ProgressBar } from 'react-native-paper';
 
 const FlashcardOptionsScreen = ({ navigation, route }) => {
   const { sections, notebook } = route.params;
@@ -33,36 +29,6 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
   const [sectionNotes, setSectionNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [flashcardGenProgress, setFlashcardGenProgress] = useState(0);
-  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
-  const adUnitId =
-    Platform.OS === "ios"
-      ? env.APPLE_FLASHCARD_AD_UNIT_ID
-      : env.ANDROID_FLASHCARD_AD_UNIT_ID;
-
-  useEffect(() => {
-    async function getConsent() {
-      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
-      return selectPersonalisedAds;
-    }
-    getConsent().then((res) => {
-      setSelectPersonalisedAds(res);
-    });
-  }, []);
-
-  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
-    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
-  });
-
-  useEffect(() => {
-    Ad.load();
-  }, [Ad.load]);
-
-  useEffect(() => {
-    if (Ad.isClosed) {
-      // Action after the ad is closed
-      handleSubmitOptions();
-    }
-  }, [Ad.isClosed, Ad.navigation]);
 
   useEffect(() => {
     setSectionNotes(
@@ -84,7 +50,7 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
 
   function sendToFlashcards(data) {
     navigation.goBack();
-    navigation.navigate("Flashcards", {
+    navigation.navigate('Flashcards', {
       notes: sectionNotes,
       flashcards: data,
       notebook: notebook,
@@ -98,7 +64,7 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
         console.log(response.error);
         return;
       }
-      flashcardsDispatch({ type: "bulkAdded", flashcards: response });
+      flashcardsDispatch({ type: 'bulkAdded', flashcards: response });
       return response;
     } catch (error) {
       console.log(error);
@@ -155,8 +121,8 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
           <MaterialIcon
             name={
               selectedSections.includes(id)
-                ? "check-box"
-                : "check-box-outline-blank"
+                ? 'check-box'
+                : 'check-box-outline-blank'
             }
             size={24}
             color={Dark.primary}
@@ -184,11 +150,7 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
           disabled={selectedSections.length <= 0}
           opacity={selectedSections.length <= 0 ? 0.5 : 1}
           onPress={() => {
-            if (Ad.isLoaded) {
-              Ad.show();
-            } else {
-              handleSubmitOptions();
-            }
+            handleSubmitOptions();
           }}
         >
           <Text style={[styles.text, { color: Dark.info }]}>Done</Text>
@@ -196,12 +158,12 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
       </View>
       <ScrollView
         style={{
-          width: "100%",
-          height: "100%",
+          width: '100%',
+          height: '100%',
         }}
         contentContainerStyle={{
-          alignItems: "center",
-          justifyContent: "center",
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         {notebookSections()}
@@ -213,7 +175,7 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
             <Text
               style={[
                 styles.text,
-                { color: Dark.primary, textAlign: "center" },
+                { color: Dark.primary, textAlign: 'center' },
               ]}
             >
               Hang tight making flashcards...
@@ -233,84 +195,84 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: Dark.background,
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 10,
     paddingHorizontal: 15,
     borderBottomWidth: 2,
-    width: "100%",
+    width: '100%',
     borderBottomColor: Dark.tertiary,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   heading: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 24,
     lineHeight: 32,
     color: Dark.secondary,
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 18,
     lineHeight: 30,
     color: Dark.primary,
   },
   sectionButton: {
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
     backgroundColor: Dark.quatrenary,
-    width: "90%",
+    width: '90%',
     height: 50,
     borderRadius: 15,
     marginVertical: 10,
     padding: 10,
-    alignItems: "center",
-    flexDirection: "row",
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   selectedSectionButton: {
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
     backgroundColor: Dark.tertiary,
-    width: "90%",
+    width: '90%',
     height: 50,
     borderRadius: 15,
     marginVertical: 10,
     padding: 10,
-    alignItems: "center",
-    flexDirection: "row",
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   checkBox: {
     marginRight: 10,
   },
   submitButton: {
     backgroundColor: Dark.info,
-    width: "80%",
+    width: '80%',
     height: 50,
     borderRadius: 25,
     marginBottom: 50,
     padding: 10,
-    alignItems: "center",
-    flexDirection: "row",
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   loadingBox: {
     height: 150,
     width: 250,
     backgroundColor: Dark.tertiary,
     borderRadius: 15,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
 });
 

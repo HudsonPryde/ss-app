@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Dark, Notebook } from "../lib/Theme";
-import { StyleSheet, Text, View, Pressable, Dimensions } from "react-native";
+import React, { useState, useEffect } from 'react';
+import { Dark, Notebook } from '../lib/Theme';
+import { StyleSheet, Text, View, Pressable, Dimensions } from 'react-native';
 import Animated, {
   useSharedValue,
   withSpring,
@@ -15,19 +15,19 @@ import Animated, {
   runOnJS,
   set,
   runOnUI,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 import {
   PanGestureHandler,
   GestureHandlerRootView,
-} from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { bulkUpsertFlashcards } from "../dao/flashcards";
-import { useFlashcardsDispatch } from "../provider/FlashcardsProvider";
+} from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { bulkUpsertFlashcards } from '../dao/flashcards';
+import { useFlashcardsDispatch } from '../provider/FlashcardsProvider';
 
-const SCREEN_WIDTH = Dimensions.get("screen").width;
-const SCREEN_HEIGHT = Dimensions.get("screen").height;
+const SCREEN_WIDTH = Dimensions.get('screen').width;
+const SCREEN_HEIGHT = Dimensions.get('screen').height;
 
 const NotebookScreen = ({ route, navigation }) => {
   const { flashcards, notebook } = route.params;
@@ -56,7 +56,7 @@ const NotebookScreen = ({ route, navigation }) => {
       bulkUpsertFlashcards(answeredCards);
       // update the flashcards in the context
       flashcardsDispatch({
-        type: "bulkUpdated",
+        type: 'bulkUpdated',
         flashcards: answeredCards,
       });
       handleNavigateToResults();
@@ -85,7 +85,7 @@ const NotebookScreen = ({ route, navigation }) => {
 
   const handleNavigateToResults = () => {
     // navigate to the results screen
-    navigation.replace("FlashcardsResults", {
+    navigation.replace('FlashcardsResults', {
       notebook,
       totalCards: answeredCards,
       incorrectCards,
@@ -164,12 +164,7 @@ const NotebookScreen = ({ route, navigation }) => {
       [SCREEN_HEIGHT * 0.32, SCREEN_HEIGHT * 0.2]
     );
     const fontSize = interpolate(scale.value, [0, 1], [15, 20]);
-    const backgroundColor = interpolateColor(
-      scale.value,
-      [0, 1],
-      [Dark.tertiary, Dark.quatrenary]
-    );
-    return { width, height, top, fontSize, backgroundColor };
+    return { width, height, top, fontSize, backgroundColor: Dark.tertiary };
   });
 
   const animatedStyle = useAnimatedStyle(() => {
@@ -291,7 +286,7 @@ const NotebookScreen = ({ route, navigation }) => {
             style={{ marginHorizontal: 10 }}
           >
             <MaterialCommunityIcon
-              name={"chevron-left"}
+              name={'chevron-left'}
               size={42}
               color={Dark.secondary}
             ></MaterialCommunityIcon>
@@ -309,7 +304,7 @@ const NotebookScreen = ({ route, navigation }) => {
                 width: 240,
                 height: 336,
                 marginTop: SCREEN_HEIGHT * 0.32,
-                position: "absolute",
+                position: 'absolute',
                 zIndex: -1,
                 elevation: -1,
               },
@@ -337,7 +332,7 @@ const NotebookScreen = ({ route, navigation }) => {
         <View style={styles.footer}>
           <Pressable style={styles.undoButton} onPress={handleUndo}>
             <MaterialIcon
-              name={"undo"}
+              name={'undo'}
               size={42}
               color={Dark.secondary}
             ></MaterialIcon>
@@ -352,60 +347,60 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexDirection: 'column',
   },
   cardContainer: {
     width: 300,
     height: 420,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginTop: SCREEN_HEIGHT * 0.17,
-    backgroundColor: "transparent",
-    position: "absolute",
+    backgroundColor: 'transparent',
+    position: 'absolute',
   },
   card: {
     padding: 15,
     borderRadius: 25,
     backgroundColor: Dark.quatrenary,
-    width: "100%",
-    height: "100%",
-    alignItems: "center",
-    justifyContent: "center",
-    backfaceVisibility: "hidden",
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backfaceVisibility: 'hidden',
     borderWidth: 2,
     borderColor: Dark.quatrenary,
   },
   backCard: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
   },
   cardText: {
     color: Dark.primary,
   },
   heading: {
-    alignSelf: "center",
+    alignSelf: 'center',
     color: Dark.primary,
     fontSize: 20,
     lineHeight: 38,
-    fontFamily: "Poppins",
+    fontFamily: 'Poppins',
   },
   header: {
     paddingVertical: 20,
     backgroundColor: Dark.header,
-    textAlignVertical: "center",
-    alignItems: "flex-start",
-    borderBottomColor: "#858585",
-    width: "100%",
+    textAlignVertical: 'center',
+    alignItems: 'flex-start',
+    borderBottomColor: '#858585',
+    width: '100%',
     borderBottomWidth: 2,
-    flexDirection: "row",
+    flexDirection: 'row',
   },
   footer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    alignItems: "flex-end",
-    alignSelf: "flex-end",
-    width: "100%",
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'flex-end',
+    alignSelf: 'flex-end',
+    width: '100%',
     height: 100,
   },
   undoButton: {

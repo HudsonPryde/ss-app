@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
-import { Camera, CameraType } from "expo-camera";
-import * as ImagePicker from "expo-image-picker";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { MaterialIcons } from "@expo/vector-icons";
-import * as ImageManipulator from "expo-image-manipulator";
-import { useScan, useScanDispatch } from "../provider/ScanProvider";
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { useCameraPermissions, CameraView } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { MaterialIcons } from '@expo/vector-icons';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { useScan, useScanDispatch } from '../provider/ScanProvider';
 import {
   StyleSheet,
   View,
@@ -14,7 +14,7 @@ import {
   Button,
   Platform,
   ActivityIndicator,
-} from "react-native";
+} from 'react-native';
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -22,16 +22,16 @@ import Animated, {
   withTiming,
   runOnJS,
   interpolate,
-} from "react-native-reanimated";
-import { Dark, Notebook } from "../lib/Theme";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { AuthContext } from "../provider/AuthProvider";
-import MlkitOcr from "react-native-mlkit-ocr";
-import CropScreen from "./CropScreen";
-import * as ScreenOrientation from "expo-screen-orientation";
+} from 'react-native-reanimated';
+import { Dark, Notebook } from '../lib/Theme';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { AuthContext } from '../provider/AuthProvider';
+import MlkitOcr from 'react-native-mlkit-ocr';
+import CropScreen from './CropScreen';
+import * as ScreenOrientation from 'expo-screen-orientation';
 
-SCREEN_HEIGHT = Dimensions.get("window").height;
-SCREEN_WIDTH = Dimensions.get("window").width;
+SCREEN_HEIGHT = Dimensions.get('window').height;
+SCREEN_WIDTH = Dimensions.get('window').width;
 
 const CameraScreen = ({ navigation, route }) => {
   const { session, user } = useContext(AuthContext);
@@ -42,13 +42,14 @@ const CameraScreen = ({ navigation, route }) => {
   const [currentImage, setCurrentImage] = useState(null);
   const [currentBoundingBoxes, setCurrentBoundingBoxes] = useState([]);
   const cameraRef = useRef(null);
-  const [permission, requestPermission] = Camera.useCameraPermissions();
+  const [permission, requestPermission] = useCameraPermissions();
   const [mediaPermision, requestMediaPermission] =
     ImagePicker.useMediaLibraryPermissions();
-  const [flashMode, setFlashMode] = useState(Camera.Constants.FlashMode.off);
+  const [flashMode, setFlashMode] = useState('off');
   const [cameraLayout, setCameraLayout] = useState(null);
   const [showBoundings, setShowBoundings] = useState(false);
   const [emitScan, setEmitScan] = useState(false);
+  const [orientation, setOrientation] = useState('portrait');
 
   useEffect(() => {
     const unlock = async () => {
@@ -76,36 +77,25 @@ const CameraScreen = ({ navigation, route }) => {
     return (value / imageHeight) * cameraLayout.height;
   }
 
-  function getOrientation(exif) {
-    // determin landscape or portrait from exif data
-    if (exif.Orientation === -90 || exif.Orientation === 90) {
-      return "portrait";
-    } else {
-      return "landscape";
-    }
-  }
-
   const handleImageCapture = async () => {
     setCameraReady(false);
     setEmitScan(true);
     cameraRef.current.pausePreview();
     const res = await cameraRef.current.takePictureAsync({ exif: true });
-    const orientation = getOrientation(res.exif);
     console.log(orientation);
-    const crop =
-      orientation === "portrait"
-        ? {
-            height: (cropLayout.height / SCREEN_HEIGHT) * res.height,
-            originX: (cropLayout.pageX / SCREEN_WIDTH) * res.width,
-            originY: (cropLayout.pageY / (SCREEN_HEIGHT - 82)) * res.height,
-            width: (cropLayout.width / SCREEN_WIDTH) * res.width,
-          }
-        : {
-            height: (cropLayout.width / SCREEN_WIDTH) * res.height,
-            originX: (cropLayout.pageY / SCREEN_WIDTH) * res.height,
-            originY: (cropLayout.pageX / (SCREEN_HEIGHT - 82)) * res.width,
-            width: (cropLayout.height / SCREEN_HEIGHT) * res.width,
-          };
+    const crop = orientation.includes('portrait')
+      ? {
+          height: (cropLayout.height / SCREEN_HEIGHT) * res.height,
+          originX: (cropLayout.pageX / SCREEN_WIDTH) * res.width,
+          originY: (cropLayout.pageY / (SCREEN_HEIGHT - 82)) * res.height,
+          width: (cropLayout.width / SCREEN_WIDTH) * res.width,
+        }
+      : {
+          height: (cropLayout.width / SCREEN_WIDTH) * res.height,
+          originX: (cropLayout.pageY / SCREEN_WIDTH) * res.height,
+          originY: (cropLayout.pageX / (SCREEN_HEIGHT - 82)) * res.width,
+          width: (cropLayout.height / SCREEN_HEIGHT) * res.width,
+        };
     // find actual placement of crop on the image
     // - 82 to account for bottom bar + border
     const image = await ImageManipulator.manipulateAsync(
@@ -117,7 +107,7 @@ const CameraScreen = ({ navigation, route }) => {
       ],
       {
         compress: 1,
-        format: "png",
+        format: 'png',
       }
     );
 
@@ -132,8 +122,8 @@ const CameraScreen = ({ navigation, route }) => {
   const handleImageCaptureResults = (ocrResult) => {
     const text = retrieveScannedText(ocrResult);
     setEmitScan(false);
-    dispatch({ type: "edited", scan: text });
-    navigation.navigate("ScannedText");
+    dispatch({ type: 'edited', scan: text });
+    navigation.navigate('ScannedText');
     cameraRef.current.resumePreview();
     setCameraReady(true);
   };
@@ -149,7 +139,7 @@ const CameraScreen = ({ navigation, route }) => {
   const retrieveScannedText = (boxes) => {
     let text = scan;
     boxes.forEach((box) => {
-      text += box.text + " ";
+      text += box.text + ' ';
     });
     if (text.length > 4000) {
       text = text.substring(0, 4000);
@@ -166,10 +156,10 @@ const CameraScreen = ({ navigation, route }) => {
           left: fitWidth(box.bounding.left, currentImage?.width ?? 0),
           height: fitHeight(box.bounding.height, currentImage?.height ?? 0),
           width: fitWidth(box.bounding.width, currentImage?.width ?? 0),
-          position: "absolute",
-          borderColor: "gold",
+          position: 'absolute',
+          borderColor: 'gold',
           borderWidth: 1,
-          borderStyle: "dashed",
+          borderStyle: 'dashed',
           borderRadius: 15,
         }}
       ></View>
@@ -182,11 +172,11 @@ const CameraScreen = ({ navigation, route }) => {
       <View style={{ flex: 1 }} />
       <View
         style={{
-          backgroundColor: "#6A4195",
+          backgroundColor: '#6A4195',
           borderRadius: 50,
           padding: 20,
           marginVertical: 15,
-          shadowColor: "#000",
+          shadowColor: '#000',
           shadowOffset: {
             width: 0,
             height: 0,
@@ -203,9 +193,9 @@ const CameraScreen = ({ navigation, route }) => {
           }}
         >
           <MaterialIcons
-            name={"center-focus-weak"}
+            name={'center-focus-weak'}
             size={45}
-            style={{ color: "white" }}
+            style={{ color: 'white' }}
           />
         </TouchableOpacity>
       </View>
@@ -214,13 +204,13 @@ const CameraScreen = ({ navigation, route }) => {
           {/* edit scanned text button */}
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("ScannedText");
+              navigation.navigate('ScannedText');
             }}
           >
             <MaterialIcons
-              name={"notes"}
+              name={'notes'}
               size={28}
-              style={{ color: "white" }}
+              style={{ color: 'white' }}
             />
           </TouchableOpacity>
         </View>
@@ -237,29 +227,25 @@ const CameraScreen = ({ navigation, route }) => {
       <View
         style={{
           flex: 1,
-          flexDirection: "row",
-          justifyContent: "center",
+          flexDirection: 'row',
+          justifyContent: 'center',
         }}
       >
         <View style={styles.pillConatiner}>
           {/* Flash light toggle */}
           <TouchableOpacity
             onPress={() => {
-              if (flashMode === Camera.Constants.FlashMode.off) {
-                setFlashMode(Camera.Constants.FlashMode.torch);
+              if (flashMode === 'off') {
+                setFlashMode('on');
               } else {
-                setFlashMode(Camera.Constants.FlashMode.off);
+                setFlashMode('off');
               }
             }}
           >
             <MaterialIcon
-              name={
-                flashMode == Camera.Constants.FlashMode.off
-                  ? "flash-off"
-                  : "flash-on"
-              }
+              name={flashMode == 'off' ? 'flash-off' : 'flash-on'}
               size={25}
-              style={{ color: "white" }}
+              style={{ color: 'white' }}
             />
           </TouchableOpacity>
         </View>
@@ -280,10 +266,10 @@ const CameraScreen = ({ navigation, route }) => {
             }}
           >
             <MaterialIcon
-              name={"photo-library"}
+              name={'photo-library'}
               size={25}
               style={{
-                color: "white",
+                color: 'white',
               }}
             />
           </TouchableOpacity>
@@ -293,18 +279,17 @@ const CameraScreen = ({ navigation, route }) => {
   );
 
   if (!permission || !mediaPermision) {
-    return null;
+    return <View></View>;
   }
 
   if (!permission.granted) {
     // Camera permissions are not granted yet
-    requestPermission();
     return (
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
-          flexDirection: "column",
+          justifyContent: 'center',
+          flexDirection: 'column',
           backgroundColor: Dark.tertiary,
           padding: 15,
         }}
@@ -312,8 +297,8 @@ const CameraScreen = ({ navigation, route }) => {
         <Text
           style={{
             color: Dark.primary,
-            textAlign: "center",
-            fontFamily: "inter",
+            textAlign: 'center',
+            fontFamily: 'inter',
             fontSize: 18,
           }}
         >
@@ -326,12 +311,12 @@ const CameraScreen = ({ navigation, route }) => {
             backgroundColor: Dark.info,
             width: 200,
             height: 50,
-            alignSelf: "center",
+            alignSelf: 'center',
             marginTop: 15,
           }}
           onPress={requestPermission}
         >
-          <Text style={{ color: Dark.tertiary, textAlign: "center" }}>
+          <Text style={{ color: Dark.tertiary, textAlign: 'center' }}>
             Grant permission
           </Text>
         </TouchableOpacity>
@@ -339,30 +324,29 @@ const CameraScreen = ({ navigation, route }) => {
     );
   }
   return (
-    <Camera
+    <CameraView
       onCameraReady={() => {
         setCameraReady(true);
       }}
-      type={Camera.Constants.Type.back}
+      facing={'back'}
       ref={cameraRef}
-      flashMode={flashMode}
+      flash={flashMode}
       responsiveOrientationWhenOrientationLocked={true}
       onResponsiveOrientationChanged={(e) => {
-        console.log(e);
+        setOrientation(e.orientation);
       }}
       onLayout={(e) => {
         setCameraLayout(e.nativeEvent.layout);
       }}
     >
-      <SafeAreaView edges={["top", "left", "right"]} style={styles.camera}>
+      <SafeAreaView edges={['top', 'left', 'right']} style={styles.camera}>
         {/* camera preview */}
         {topButtons}
         <View
           style={{
             flex: 1,
             zIndex: -1,
-            flexDirection: "column",
-            justifyContent: "center",
+            paddingBottom: 80,
           }}
         >
           <CropScreen
@@ -378,44 +362,44 @@ const CameraScreen = ({ navigation, route }) => {
       {/* results image */}
       {showBoundings ? (
         <Animated.View
-          style={[StyleSheet.absoluteFill, { backgroundColor: "transparent" }]}
+          style={[StyleSheet.absoluteFill, { backgroundColor: 'transparent' }]}
         >
           {boundingBoxes}
         </Animated.View>
       ) : null}
       {loading ? (
         <View style={styles.loadingOverlay}>
-          <ActivityIndicator size={"large"} color={Dark.primary} />
+          <ActivityIndicator size={'large'} color={Dark.primary} />
         </View>
       ) : null}
-    </Camera>
+    </CameraView>
   );
 };
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   camera: {
-    height: "100%",
-    width: "100%",
-    flexDirection: "column",
-    justifyContent: "space-between",
+    height: '100%',
+    width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
   },
   header: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 18,
     lineHeight: 30,
     color: Dark.primary,
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,
@@ -424,14 +408,14 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     opacity: 0.75,
     backgroundColor: Dark.secondary,
-    alignSelf: "center",
+    alignSelf: 'center',
     padding: 5,
     margin: 5,
   },
   textDrawer: {
-    flexDirection: "row",
-    width: Dimensions.get("screen").width,
-    height: "85%",
+    flexDirection: 'row',
+    width: Dimensions.get('screen').width,
+    height: '85%',
     backgroundColor: Dark.tertiary,
     borderRadius: 10,
     paddingVertical: 15,
@@ -442,17 +426,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   loadingOverlay: {
-    position: "absolute",
-    height: "100%",
-    width: "100%",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    flexDirection: "column",
-    justifyContent: "center",
+    position: 'absolute',
+    height: '100%',
+    width: '100%',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   loadingIndicator: {
-    alignSelf: "center",
+    alignSelf: 'center',
     height: 5,
-    width: "100%",
+    width: '100%',
     borderRadius: 15,
     backgroundColor: Dark.info,
   },
@@ -462,18 +446,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     marginBottom: 15,
     height: 20,
-    alignSelf: "center",
-    flexDirection: "row",
+    alignSelf: 'center',
+    flexDirection: 'row',
   },
   pillConatiner: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 25,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: 'rgba(0,0,0,0.45)',
     paddingVertical: 5,
     padding: 15,
-    alignSelf: "center",
+    alignSelf: 'center',
     marginHorizontal: 10,
   },
   makeNotesButton: {
@@ -481,18 +465,18 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingHorizontal: 5,
     marginTop: 15,
-    width: "100%",
+    width: '100%',
     height: 35,
-    alignSelf: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    alignSelf: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scannedTextButton: {
-    flexDirection: "column",
-    justifyContent: "flex-end",
-    alignItems: "center",
-    alignSelf: "center",
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    alignSelf: 'center',
     flex: 1,
   },
 });

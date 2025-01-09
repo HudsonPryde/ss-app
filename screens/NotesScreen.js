@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
-import { Dark } from "../lib/Theme";
+import React, { useState, useRef, useEffect, useContext } from 'react';
+import { Dark } from '../lib/Theme';
 import {
   StyleSheet,
   Text,
@@ -14,21 +14,22 @@ import {
   Animated,
   ActivityIndicator,
   TouchableOpacity,
-} from "react-native";
-import NoteBlock from "../components/NoteBlock";
-import NewNotebookModal from "../components/modals/NewNotebookModal";
-import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { createSection } from "../dao/notebookSections";
-import { createNotes } from "../dao/notes";
-import { AuthContext } from "../provider/AuthProvider";
-import { useNotesDispatch } from "../provider/NotesProvider";
-import { useNotebooks } from "../provider/NotebookProvider";
-import { useSections, useSectionsDispatch } from "../provider/SectionsProvider";
+  Platform,
+} from 'react-native';
+import NoteBlock from '../components/NoteBlock';
+import NewNotebookModal from '../components/modals/NewNotebookModal';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { createSection } from '../dao/notebookSections';
+import { createNotes } from '../dao/notes';
+import { AuthContext } from '../provider/AuthProvider';
+import { useNotesDispatch } from '../provider/NotesProvider';
+import { useNotebooks } from '../provider/NotebookProvider';
+import { useSections, useSectionsDispatch } from '../provider/SectionsProvider';
 
 if (
-  Platform.OS === "android" &&
+  Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -47,8 +48,8 @@ const NotesScreen = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showSelectSectionModal, setShowSelectSectionModal] = useState(false);
   const [showNewSectionModal, setShowNewSectionModal] = useState(false);
-  const [newNotebookName, setNewNotebookName] = useState("");
-  const [newSectionName, setNewSectionName] = useState("");
+  const [newNotebookName, setNewNotebookName] = useState('');
+  const [newSectionName, setNewSectionName] = useState('');
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [emitCreateNotebook, setEmitCreateNotebook] = useState(false);
   const [emitRefresh, setEmitRefresh] = useState(false);
@@ -84,7 +85,7 @@ const NotesScreen = ({ navigation, route }) => {
       setIsLoading(true);
       const section = await createSection(newSectionName, selectedNotebook?.id);
       sectionsDispatch({
-        type: "added",
+        type: 'added',
         ...section,
       });
       // assign notes to section
@@ -93,7 +94,7 @@ const NotesScreen = ({ navigation, route }) => {
         return note;
       });
       const createdNotes = await createNotes(sectionNotes);
-      notesDispatch({ type: "bulkAdded", notes: createdNotes });
+      notesDispatch({ type: 'bulkAdded', notes: createdNotes });
       navigation.goBack();
     } catch (e) {
       console.log(e);
@@ -112,7 +113,7 @@ const NotesScreen = ({ navigation, route }) => {
         return note;
       });
       const response = await createNotes(sectionNotes);
-      notesDispatch({ type: "bulkAdded", notes: response });
+      notesDispatch({ type: 'bulkAdded', notes: response });
       setDarken(false);
       navigation.goBack();
     } catch (e) {
@@ -141,15 +142,15 @@ const NotesScreen = ({ navigation, route }) => {
           {
             marginBottom: 0,
             marginTop: 10,
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignItems: 'center',
             padding: 15,
             height: 60,
           },
         ]}
       >
         <MaterialCommunityIcon
-          name={"book-variant"}
+          name={'book-variant'}
           size={24}
           color={data.colour}
         ></MaterialCommunityIcon>
@@ -172,8 +173,8 @@ const NotesScreen = ({ navigation, route }) => {
           {
             margin: 0,
             padding: 15,
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignItems: 'center',
             borderTopWidth: 2,
             borderTopColor: Dark.tertiary,
             borderRadius: 0,
@@ -181,7 +182,7 @@ const NotesScreen = ({ navigation, route }) => {
         ]}
       >
         <MaterialCommunityIcon
-          name={"folder"}
+          name={'folder'}
           size={22}
           color={Dark.secondary}
         ></MaterialCommunityIcon>
@@ -201,7 +202,7 @@ const NotesScreen = ({ navigation, route }) => {
       }}
     >
       <Animated.View
-        style={{ width: "100%", height: "100%" }}
+        style={{ width: '100%', height: '100%' }}
         opacity={fadeAnim}
       >
         <View style={styles.header}>
@@ -211,7 +212,7 @@ const NotesScreen = ({ navigation, route }) => {
             style={{ marginHorizontal: 10 }}
           >
             <MaterialCommunityIcon
-              name={"chevron-left"}
+              name={'chevron-left'}
               size={42}
               color={Dark.secondary}
             ></MaterialCommunityIcon>
@@ -219,9 +220,9 @@ const NotesScreen = ({ navigation, route }) => {
           {/* label for Notebook to add notes to */}
           <Pressable
             style={{
-              alignSelf: "center",
-              flexDirection: "row",
-              alignItems: "center",
+              alignSelf: 'center',
+              flexDirection: 'row',
+              alignItems: 'center',
             }}
             onPress={() => {
               // LayoutAnimation.configureNext(
@@ -237,10 +238,10 @@ const NotesScreen = ({ navigation, route }) => {
                 { fontSize: 20, color: Dark.primary, maxWidth: 200 },
               ]}
             >
-              {selectedNotebook ? selectedNotebook.name : "select notebook..."}
+              {selectedNotebook ? selectedNotebook.name : 'select notebook...'}
             </Text>
             <MaterialCommunityIcon
-              name={showModal ? "chevron-right" : "chevron-down"}
+              name={showModal ? 'chevron-right' : 'chevron-down'}
               size={18}
               color={Dark.secondary}
             ></MaterialCommunityIcon>
@@ -249,8 +250,8 @@ const NotesScreen = ({ navigation, route }) => {
           <TouchableOpacity
             style={{
               flex: 1,
-              flexDirection: "row-reverse",
-              alignSelf: "center",
+              flexDirection: 'row-reverse',
+              alignSelf: 'center',
               marginLeft: 20,
             }}
             onPress={() => {
@@ -260,7 +261,7 @@ const NotesScreen = ({ navigation, route }) => {
             disabled={selectedNotebook === null}
           >
             <MaterialIcon
-              name={"add"}
+              name={'add'}
               size={38}
               color={Dark.secondary}
             ></MaterialIcon>
@@ -291,15 +292,15 @@ const NotesScreen = ({ navigation, route }) => {
                     styles.optionsContainer,
                     {
                       marginBottom: 0,
-                      flexDirection: "row",
-                      alignItems: "center",
+                      flexDirection: 'row',
+                      alignItems: 'center',
                       padding: 15,
                       height: 60,
                     },
                   ]}
                 >
                   <MaterialCommunityIcon
-                    name={"plus"}
+                    name={'plus'}
                     size={24}
                     color={Dark.secondary}
                   ></MaterialCommunityIcon>
@@ -349,15 +350,15 @@ const NotesScreen = ({ navigation, route }) => {
                     styles.optionsContainer,
                     {
                       marginBottom: 0,
-                      flexDirection: "row",
-                      alignItems: "center",
+                      flexDirection: 'row',
+                      alignItems: 'center',
                       padding: 15,
                       height: 60,
                     },
                   ]}
                 >
                   <MaterialCommunityIcon
-                    name={"book-variant"}
+                    name={'book-variant'}
                     size={26}
                     color={
                       selectedNotebook
@@ -368,7 +369,7 @@ const NotesScreen = ({ navigation, route }) => {
                   <Text style={[styles.text, { marginLeft: 15, fontSize: 22 }]}>
                     {selectedNotebook
                       ? selectedNotebook.name
-                      : "select notebook..."}
+                      : 'select notebook...'}
                   </Text>
                 </View>
                 <View style={[styles.optionsContainer]}>
@@ -381,15 +382,15 @@ const NotesScreen = ({ navigation, route }) => {
                       styles.optionsContainer,
                       {
                         margin: 0,
-                        flexDirection: "row",
-                        alignItems: "center",
+                        flexDirection: 'row',
+                        alignItems: 'center',
                         borderRadius: 0,
                         padding: 15,
                       },
                     ]}
                   >
                     <MaterialCommunityIcon
-                      name={"plus"}
+                      name={'plus'}
                       size={24}
                       color={Dark.secondary}
                     ></MaterialCommunityIcon>
@@ -414,7 +415,7 @@ const NotesScreen = ({ navigation, route }) => {
         >
           <KeyboardAvoidingView
             style={[styles.newNotebookModal]}
-            behavior={"padding"}
+            behavior={'padding'}
           >
             <View style={[styles.newNotebookContainer]}>
               <TextInput
@@ -422,7 +423,7 @@ const NotesScreen = ({ navigation, route }) => {
                 value={newSectionName}
                 onChangeText={(text) => setNewSectionName(text)}
                 style={{
-                  alignSelf: "center",
+                  alignSelf: 'center',
                   padding: 10,
                   margin: 15,
                   width: 225,
@@ -430,18 +431,18 @@ const NotesScreen = ({ navigation, route }) => {
                   color: Dark.primary,
                   fontSize: 20,
                   borderRadius: 10,
-                  fontFamily: "PoppinsRegular",
+                  fontFamily: 'PoppinsRegular',
                 }}
               ></TextInput>
               {/* confirmation buttons */}
               <View
-                style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+                style={{ flexDirection: 'row', justifyContent: 'space-evenly' }}
               >
                 <Pressable
                   disabled={isLoading}
                   style={styles.optionButton}
                   onPress={() => {
-                    setNewSectionName("");
+                    setNewSectionName('');
                     setDarken(false);
                     setShowNewSectionModal(false);
                   }}
@@ -479,16 +480,16 @@ const NotesScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: Dark.background,
-    height: "100%",
-    alignContent: "center",
-    alignItems: "center",
-    justifyContent: "center",
+    height: '100%',
+    alignContent: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   header: {
     backgroundColor: Dark.header,
-    textAlignVertical: "center",
-    flexDirection: "row",
-    alignItems: "center",
+    textAlignVertical: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
     borderBottomColor: Dark.tertiary,
     borderBottomWidth: 2,
     paddingBottom: 10,
@@ -499,16 +500,16 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.tertiary,
   },
   optionsContainer: {
-    backgroundColor: "#242424",
+    backgroundColor: '#242424',
     borderRadius: 15,
-    flexDirection: "column",
+    flexDirection: 'column',
     margin: 25,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   optionsText: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,
@@ -518,33 +519,33 @@ const styles = StyleSheet.create({
     borderTopColor: Dark.tertiary,
     padding: 10,
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,
   },
   newNotebookModal: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   newNotebookContainer: {
     backgroundColor: Dark.quatrenary,
     borderRadius: 15,
-    alignSelf: "center",
-    flexDirection: "column",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
+    alignSelf: 'center',
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+    justifyContent: 'flex-start',
     width: 275,
     // height: 175,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 });
 

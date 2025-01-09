@@ -37,7 +37,9 @@
         {
           "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
         }
-      ]
+      ],
+      "expo-font",
+      "expo-secure-store"
     ],
     "splash": {
       "image": "./assets/ss-splash.png",
@@ -63,10 +65,9 @@
               "com.googleusercontent.apps.1089486777421-c5kth7j1vt2s6bem3286pfs1lb6t7ju8"
             ]
           }
-        ],
-        "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you."
+        ]
       },
-      "buildNumber": "2",
+      "buildNumber": "3",
       "runtimeVersion": {
         "policy": "sdkVersion"
       }
@@ -96,8 +97,6 @@
   },
   "react-native-google-mobile-ads": {
     "android_app_id": "ca-app-pub-8992141010215842~4116132267",
-    "ios_app_id": "ca-app-pub-8992141010215842~1957836819",
-    "delay_app_measurement_init": true,
-    "user_tracking_usage_description": "This identifier will be used to deliver personalized ads to you."
+    "ios_app_id": "ca-app-pub-8992141010215842~1957836819"
   }
 }

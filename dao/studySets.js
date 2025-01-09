@@ -1,15 +1,15 @@
-import { supabase } from "../lib/initSupabase.js";
+import { supabase } from '../lib/initSupabase.js';
 
 /*
 description: create a new notebook
 props: 
   - user_id: id of the user creating the notebook
   - name: name of the notebook
-  - colour?: colour of the notebook (optinal)
+  - colour?: colour of the notebook (optional)
 */
 export const createStudySet = async (user_id, name, colour) => {
   const { data, error } = await supabase
-    .from("Notebooks")
+    .from('Notebooks')
     .insert({ user_id: user_id, name: name, colour: colour })
     .select();
   if (error) {
@@ -22,10 +22,10 @@ export const createStudySet = async (user_id, name, colour) => {
 // return an object containing all user study sets
 export const getStudySets = async (user_id) => {
   let { data: Notebooks, error } = await supabase
-    .from("Notebooks")
-    .select("*")
-    .eq("user_id", user_id)
-    .order("created_at", { ascending: false });
+    .from('Notebooks')
+    .select('*')
+    .eq('user_id', user_id)
+    .order('created_at', { ascending: false });
   if (error) {
     console.error(error);
     return error;
@@ -40,9 +40,9 @@ props:
 */
 export const getStudySet = async (notebook_id) => {
   const { data, error } = await supabase
-    .from("Notebooks")
-    .select("*")
-    .eq("id", notebook_id);
+    .from('Notebooks')
+    .select('*')
+    .eq('id', notebook_id);
   if (error) {
     console.error(error);
     return error;
@@ -57,9 +57,9 @@ props:
 */
 export const removeStudySet = async (notebook_id) => {
   const { error } = await supabase
-    .from("Notebooks")
+    .from('Notebooks')
     .delete()
-    .eq("id", notebook_id);
+    .eq('id', notebook_id);
   if (error) {
     console.error(error);
     return error;
@@ -74,9 +74,9 @@ props:
 */
 export const updateStudySet = async (notebook_id, options) => {
   const { data, error } = await supabase
-    .from("Notebooks")
+    .from('Notebooks')
     .update(options)
-    .eq("id", notebook_id)
+    .eq('id', notebook_id)
     .select();
   if (error) {
     console.error(error);
@@ -92,9 +92,9 @@ props:
 */
 export const countSections = async (notebook_id) => {
   const { data, error } = await supabase
-    .from("Sections")
-    .select("id")
-    .eq("notebook_id", notebook_id);
+    .from('Sections')
+    .select('id')
+    .eq('notebook_id', notebook_id);
   if (error) {
     console.error(error);
     return error;

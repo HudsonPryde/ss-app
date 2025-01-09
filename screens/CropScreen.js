@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Dark } from "../lib/Theme";
-import { View, StyleSheet, Dimensions } from "react-native";
+import React, { useState, useEffect, useRef } from 'react';
+import { Dark } from '../lib/Theme';
+import { View, StyleSheet, Dimensions } from 'react-native';
 import {
   Canvas,
   Rect,
@@ -11,21 +11,21 @@ import {
   useSharedValueEffect,
   useValue,
   runTiming,
-} from "@shopify/react-native-skia";
+} from '@shopify/react-native-skia';
 import Animated, {
   useAnimatedStyle,
   useAnimatedGestureHandler,
   useSharedValue,
   Easing,
   withTiming,
-} from "react-native-reanimated";
+} from 'react-native-reanimated';
 import {
   GestureHandlerRootView,
   PanGestureHandler,
-} from "react-native-gesture-handler";
+} from 'react-native-gesture-handler';
 
 const CropScreen = ({ emitCropLayout, startScan }) => {
-  const { height, width } = Dimensions.get("window");
+  const { height, width } = Dimensions.get('window');
   const [cropLayout, setCropLayout] = useState(null);
   const cropWidth = useSharedValue(width / 2);
   const cropHeight = useSharedValue(height / 2);
@@ -69,7 +69,7 @@ const CropScreen = ({ emitCropLayout, startScan }) => {
       borderLeftWidth: width / 2 - cropWidth.value / 2,
       borderBottomWidth: height / 2 - cropHeight.value / 2,
       borderRightWidth: width / 2 - cropWidth.value / 2,
-      borderColor: "rgba(0,0,0,0.4)",
+      borderColor: 'rgba(0,0,0,0.4)',
     };
   });
 
@@ -77,16 +77,15 @@ const CropScreen = ({ emitCropLayout, startScan }) => {
     <GestureHandlerRootView>
       <View
         style={{
-          flexDirection: "column",
-          justifyContent: "center",
+          flexDirection: 'column',
+          justifyContent: 'center',
         }}
       >
         <PanGestureHandler onGestureEvent={eventHandler}>
           <Animated.View
             style={[
               {
-                position: "absolute",
-                backgroundColor: "rgba(0,0,0,0.2)",
+                backgroundColor: 'rgba(0,0,0,0.2)',
               },
               borderStyle,
             ]}
@@ -123,15 +122,15 @@ const CropScreen = ({ emitCropLayout, startScan }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignSelf: "center",
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignSelf: 'center',
     borderRadius: 5,
   },
   row: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "space-between",
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
   },
   topRightCorner: {
     width: 20,
@@ -139,7 +138,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 5,
     borderTopWidth: 2,
     borderRightWidth: 2,
-    borderColor: "white",
+    borderColor: 'white',
     right: -2,
     top: -2,
   },
@@ -149,7 +148,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 5,
     borderTopWidth: 2,
     borderLeftWidth: 2,
-    borderColor: "white",
+    borderColor: 'white',
     top: -2,
     left: -2,
   },
@@ -159,7 +158,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 5,
     borderBottomWidth: 2,
     borderLeftWidth: 2,
-    borderColor: "white",
+    borderColor: 'white',
     bottom: -2,
     left: -2,
   },
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 5,
     borderBottomWidth: 2,
     borderRightWidth: 2,
-    borderColor: "white",
+    borderColor: 'white',
     bottom: -2,
     right: -2,
   },

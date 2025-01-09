@@ -1,10 +1,10 @@
-import React, { useEffect } from "react";
-import { Dark } from "../lib/Theme";
-import { Pressable, View, StyleSheet, Text } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { useSections } from "../provider/SectionsProvider";
-import { useNotebooks } from "../provider/NotebookProvider";
+import React, { useEffect } from 'react';
+import { Dark } from '../lib/Theme';
+import { Pressable, View, StyleSheet, Text } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { useSections } from '../provider/SectionsProvider';
+import { useNotebooks } from '../provider/NotebookProvider';
 
 const Notebook = ({ id, triggerModal }) => {
   const navigation = useNavigation();
@@ -17,6 +17,7 @@ const Notebook = ({ id, triggerModal }) => {
 
   useEffect(() => {
     // count the number of sections in the notebook
+    console.log(sections);
     if (!sections) return;
     const count = sections?.filter(
       (section) => section.notebook_id === id
@@ -32,7 +33,7 @@ const Notebook = ({ id, triggerModal }) => {
   return (
     <Pressable
       onPress={() =>
-        navigation.navigate("Notebook", {
+        navigation.navigate('Notebook', {
           id: id,
         })
       }
@@ -41,9 +42,9 @@ const Notebook = ({ id, triggerModal }) => {
         <View
           style={{
             felx: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
           }}
         >
           <Text
@@ -54,15 +55,15 @@ const Notebook = ({ id, triggerModal }) => {
             {name}
           </Text>
           <Pressable onPress={() => triggerModal(id)} hitSlop={10}>
-            <MaterialIcon name={"more-horiz"} size={25} color={"#FFFFF0"} />
+            <MaterialIcon name={'more-horiz'} size={25} color={'#FFFFF0'} />
           </Pressable>
         </View>
         <View
           style={{
-            flexDirection: "row",
+            flexDirection: 'row',
             minWidth: 100,
             maxWidth: 120,
-            justifyContent: "space-evenly",
+            justifyContent: 'space-evenly',
           }}
         >
           <View style={styles.setCountPill}>
@@ -70,17 +71,17 @@ const Notebook = ({ id, triggerModal }) => {
               style={[
                 styles.text,
                 {
-                  color: "#121212",
+                  color: '#121212',
                   fontSize: 16,
-                  textAlign: "center",
-                  alignSelf: "center",
+                  textAlign: 'center',
+                  alignSelf: 'center',
                 },
               ]}
             >
               {sectionCount}
             </Text>
           </View>
-          <Text style={[styles.text, { fontFamily: "Poppins", fontSize: 14 }]}>
+          <Text style={[styles.text, { fontFamily: 'Poppins', fontSize: 14 }]}>
             sections
           </Text>
         </View>
@@ -93,21 +94,21 @@ const styles = StyleSheet.create({
   studySet: {
     padding: 15,
     height: 100,
-    flexDirection: "column",
-    justifyContent: "space-between",
-    alignContent: "center",
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignContent: 'center',
     borderRadius: 15,
   },
   text: {
-    fontFamily: "Poppins",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'Poppins',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 18,
-    color: "#FFFFF0",
+    color: '#FFFFF0',
     lineHeight: 23,
   },
   setCountPill: {
-    backgroundColor: "#FFFFF0",
+    backgroundColor: '#FFFFF0',
     borderRadius: 15,
     paddingHorizontal: 10,
     maxWidth: 50,

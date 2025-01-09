@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Dark } from "../lib/Theme";
+import React, { useState, useEffect } from 'react';
+import { Dark } from '../lib/Theme';
 import {
   View,
   Text,
@@ -10,20 +10,21 @@ import {
   KeyboardAvoidingView,
   Modal,
   TouchableOpacity,
-} from "react-native";
+} from 'react-native';
 import Animated, {
   ZoomIn,
   ZoomOut,
   FadeIn,
-  Layout,
-} from "react-native-reanimated";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
-import MaterialIcon from "react-native-vector-icons/MaterialIcons";
-import { removeNotes, createNote } from "../dao/notes";
-import { useNotes, useNotesDispatch } from "../provider/NotesProvider";
-import { useFlashcards } from "../provider/FlashcardsProvider";
-import { TextInput } from "react-native-gesture-handler";
+  Easing,
+  LinearTransition,
+} from 'react-native-reanimated';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import { removeNotes, createNote } from '../dao/notes';
+import { useNotes, useNotesDispatch } from '../provider/NotesProvider';
+import { useFlashcards } from '../provider/FlashcardsProvider';
+import { TextInput } from 'react-native-gesture-handler';
 
 const SectionNotesScreen = ({ route, navigation }) => {
   const notes = useNotes();
@@ -35,7 +36,7 @@ const SectionNotesScreen = ({ route, navigation }) => {
   const [notesList, setNotesList] = useState([]);
   const [removedNotes, setRemovedNotes] = useState([]);
   const [showAddNoteModal, setShowAddNoteModal] = useState(false);
-  const [noteText, setNoteText] = useState("");
+  const [noteText, setNoteText] = useState('');
 
   useEffect(() => {
     setNotesList(notes?.filter((note) => note.section_id === sectionId));
@@ -44,7 +45,7 @@ const SectionNotesScreen = ({ route, navigation }) => {
   const handleSave = async () => {
     await removeNotes(removedNotes);
     dispatch({
-      type: "bulkRemoved",
+      type: 'bulkRemoved',
       ids: notesList
         .filter((note) => removedNotes.includes(note.id))
         .map((note) => note.id),
@@ -61,13 +62,13 @@ const SectionNotesScreen = ({ route, navigation }) => {
   const handleAddNote = async () => {
     const note = await createNote({ text: noteText, section_id: sectionId });
     dispatch({
-      type: "added",
+      type: 'added',
       id: note.id,
       section_id: note.section_id,
       text: note.text,
       created_at: note.created_at,
     });
-    setNoteText("");
+    setNoteText('');
   };
 
   const noteComponents = notesList.map((note, index) => {
@@ -78,16 +79,15 @@ const SectionNotesScreen = ({ route, navigation }) => {
           style={[styles.note]}
           // entering={ZoomIn}
           exiting={ZoomOut}
-          layout={Layout.easing()}
+          itemLayoutAnimation={LinearTransition}
         >
           {editMode && (
             <Animated.View
               // entering={ZoomIn}
               exiting={ZoomOut}
-              layout={Layout.easing()}
               style={{
-                alignSelf: "flex-end",
-                position: "absolute",
+                alignSelf: 'flex-end',
+                position: 'absolute',
                 right: 15,
                 top: 10,
               }}
@@ -111,16 +111,16 @@ const SectionNotesScreen = ({ route, navigation }) => {
     <Animated.View entering={FadeIn}>
       <Pressable
         style={{
-          flexDirection: "row",
-          alignItems: "center",
+          flexDirection: 'row',
+          alignItems: 'center',
           width: 60,
-          justifyContent: "space-between",
+          justifyContent: 'space-between',
         }}
         onPress={() => setEditMode(!editMode)}
       >
         <MaterialIcon
           size={22}
-          name={"edit"}
+          name={'edit'}
           color={Dark.secondary}
         ></MaterialIcon>
         <Text style={[styles.heading, { fontSize: 16 }]} color={Dark.secondary}>
@@ -178,25 +178,25 @@ const SectionNotesScreen = ({ route, navigation }) => {
             flex: 1,
             borderWidth: 1,
             borderColor: Dark.secondary,
-            marginTop: "15%",
+            marginTop: '15%',
             paddingTop: 15,
           },
         ]}
       >
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-            justifyContent: "space-between",
+            flexDirection: 'row',
+            alignItems: 'center',
+            width: '100%',
+            justifyContent: 'space-between',
           }}
         >
           <Pressable
             style={{
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection: 'row',
+              alignItems: 'center',
               width: 60,
-              justifyContent: "space-between",
+              justifyContent: 'space-between',
             }}
             onPress={() => {
               setShowAddNoteModal(!showAddNoteModal);
@@ -211,10 +211,10 @@ const SectionNotesScreen = ({ route, navigation }) => {
           </Pressable>
           <Pressable
             style={{
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection: 'row',
+              alignItems: 'center',
               width: 60,
-              justifyContent: "space-between",
+              justifyContent: 'space-between',
             }}
             onPress={() => {
               handleAddNote();
@@ -230,7 +230,7 @@ const SectionNotesScreen = ({ route, navigation }) => {
           <TextInput
             style={[
               styles.text,
-              { flex: 1, lineHeight: 23, textAlignVertical: "top" },
+              { flex: 1, lineHeight: 23, textAlignVertical: 'top' },
             ]}
             autoFocus={true}
             placeholder="Enter note text"
@@ -249,7 +249,7 @@ const SectionNotesScreen = ({ route, navigation }) => {
     <SafeAreaView
       style={styles.container}
       opacity={darken ? 0.5 : 1}
-      edges={["top", "left", "right"]}
+      edges={['top', 'left', 'right']}
     >
       <View style={styles.header}>
         <TouchableOpacity
@@ -259,21 +259,21 @@ const SectionNotesScreen = ({ route, navigation }) => {
         >
           <MaterialIcon
             size={28}
-            name={"chevron-left"}
+            name={'chevron-left'}
             color={Dark.secondary}
           ></MaterialIcon>
         </TouchableOpacity>
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignItems: 'center',
             flex: 1,
-            justifyContent: "flex-start",
+            justifyContent: 'flex-start',
           }}
         >
           <MaterialIcon
             size={22}
-            name={"folder-open"}
+            name={'folder-open'}
             color={Dark.secondary}
           ></MaterialIcon>
           <Text style={styles.heading} color={Dark.secondary} numberOfLines={1}>
@@ -283,24 +283,30 @@ const SectionNotesScreen = ({ route, navigation }) => {
         {!editMode && editButton}
         {editMode && confirmButtons}
       </View>
-      <ScrollView
+      <Animated.FlatList
+        data={noteComponents}
+        renderItem={({ item }) => item}
+        itemLayoutAnimation={LinearTransition}
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContentContainer}
-      >
-        {/* new note button */}
-        {!editMode && (
-          <Animated.View entering={ZoomIn} exiting={ZoomOut}>
-            <Pressable
-              onPress={() => setShowAddNoteModal(true)}
-              style={styles.newNoteButton}
-            >
-              <MaterialIcon name="add" size={24} color={Dark.secondary} />
-            </Pressable>
-          </Animated.View>
-        )}
-        {noteComponents}
-      </ScrollView>
-
+        ListHeaderComponent={() => {
+          {
+            /* new note button */
+          }
+          return (
+            !editMode && (
+              <Animated.View>
+                <Pressable
+                  onPress={() => setShowAddNoteModal(true)}
+                  style={styles.newNoteButton}
+                >
+                  <MaterialIcon name="add" size={24} color={Dark.secondary} />
+                </Pressable>
+              </Animated.View>
+            )
+          );
+        }}
+      />
       {addNoteModal}
     </SafeAreaView>
   );
@@ -308,21 +314,21 @@ const SectionNotesScreen = ({ route, navigation }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "column",
+    flexDirection: 'column',
     backgroundColor: Dark.background,
-    alignItems: "center",
+    alignItems: 'center',
     flex: 1,
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     // paddingHorizontal: 15,
     paddingVertical: 15,
     elevation: 5,
@@ -334,15 +340,15 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 1,
     shadowRadius: 25,
-    alignItems: "center",
+    alignItems: 'center',
     backgroundColor: Dark.background,
-    justifyContent: "space-between",
-    width: "90%",
+    justifyContent: 'space-between',
+    width: '90%',
   },
   heading: {
-    fontFamily: "Poppins",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'Poppins',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 22,
     lineHeight: 38,
     width: 200,
@@ -350,54 +356,54 @@ const styles = StyleSheet.create({
     color: Dark.primary,
   },
   note: {
-    width: Dimensions.get("window").width - 20,
+    width: Dimensions.get('window').width - 20,
     margin: 15,
     padding: 25,
     borderRadius: 15,
     backgroundColor: Dark.quatrenary,
   },
   scrollContainer: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   scrollContentContainer: {
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 5,
   },
   optionButton: {
     padding: 5,
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   optionsText: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,
   },
   segmentedButtons: {
-    flexDirection: "row",
-    justifyContent: "space-evenly",
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     width: 150,
     borderRadius: 15,
     backgroundColor: Dark.tertiary,
   },
   newNoteButton: {
-    width: Dimensions.get("window").width - 20,
+    width: Dimensions.get('window').width - 20,
     margin: 15,
     padding: 25,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderWidth: 2,
     borderColor: Dark.secondary,
     borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     height: 75,
   },
 });

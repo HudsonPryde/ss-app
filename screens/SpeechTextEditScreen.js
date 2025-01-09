@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -7,8 +7,9 @@ import {
   KeyboardAvoidingView,
   Pressable,
   Text,
-} from "react-native";
-import { Dark } from "../lib/Theme";
+  Platform,
+} from 'react-native';
+import { Dark } from '../lib/Theme';
 
 const SpeechTextEditScreen = ({ navigation, route }) => {
   const { initText } = route.params;
@@ -22,7 +23,7 @@ const SpeechTextEditScreen = ({ navigation, route }) => {
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.header}>
         <Pressable onPress={() => navigation.goBack()}>
@@ -32,7 +33,7 @@ const SpeechTextEditScreen = ({ navigation, route }) => {
           {text.length}/4000
         </Text>
         <Pressable
-          onPress={() => navigation.navigate("Audio", { initText: text })}
+          onPress={() => navigation.navigate('Audio', { initText: text })}
         >
           <Text style={[styles.text, { color: Dark.info }]}>Save</Text>
         </Pressable>
@@ -52,39 +53,39 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    flexDirection: "column",
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
   },
   textInput: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 20,
     lineHeight: 30,
     color: Dark.primary,
-    overflow: "scroll",
+    overflow: 'scroll',
     padding: 20,
     paddingBottom: 100,
-    width: "100%",
+    width: '100%',
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 2,
-    width: "100%",
+    width: '100%',
     borderBottomColor: Dark.tertiary,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 16,
     lineHeight: 30,
     color: Dark.primary,
-    overflow: "scroll",
+    overflow: 'scroll',
   },
 });
 

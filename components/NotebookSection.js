@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Dark } from "../lib/Theme";
+import React, { useState, useEffect, useRef } from 'react';
+import { Dark } from '../lib/Theme';
 import {
   StyleSheet,
   View,
@@ -8,30 +8,32 @@ import {
   LayoutAnimation,
   UIManager,
   Modal,
-} from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { useSectionsDispatch } from "../provider/SectionsProvider";
-import { MaterialIcons } from "@expo/vector-icons";
-import { removeSection, renameSection } from "../dao/notebookSections";
-import { TextInput } from "react-native-gesture-handler";
+  Platform,
+} from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { useSections, useSectionsDispatch } from '../provider/SectionsProvider';
+import { MaterialIcons } from '@expo/vector-icons';
+import { removeSection, renameSection } from '../dao/notebookSections';
+import {
+  GestureHandlerRootView,
+  TextInput,
+} from 'react-native-gesture-handler';
 if (
-  Platform.OS === "android" &&
+  Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
-const NotebookSection = ({ section, requestDarken }) => {
+const NotebookSection = ({ id, requestDarken }) => {
   const navigation = useNavigation();
+  const sections = useSections();
   const dispatch = useSectionsDispatch();
+  const section = sections?.find((sect) => sect.id == id);
   const [showOptionModal, setShowOptionModal] = useState(false);
   const [rename, setRename] = useState(false);
-  const [sectionName, setSectionName] = useState(section.name);
+  const [sectionName, setSectionName] = useState(section?.name);
   const inputRef = useRef(null);
-
-  useEffect(() => {
-    setSectionName(section.name);
-  }, [section]);
 
   useEffect(() => {
     if (showOptionModal) {
@@ -44,8 +46,8 @@ const NotebookSection = ({ section, requestDarken }) => {
   const handleRemoveSection = async () => {
     try {
       setShowOptionModal(false);
-      await removeSection(section.id);
-      dispatch({ type: "removed", id: section.id });
+      await removeSection(section?.id);
+      dispatch({ type: 'removed', id: section?.id });
     } catch (err) {
       console.error(err);
     }
@@ -53,9 +55,9 @@ const NotebookSection = ({ section, requestDarken }) => {
 
   const handleRenameSection = async () => {
     try {
-      await renameSection(id, sectionName);
+      await renameSection(section?.id, sectionName);
       dispatch({
-        type: "updated",
+        type: 'updated',
         section: { ...section, name: sectionName },
       });
       setShowOptionModal(false);
@@ -71,47 +73,49 @@ const NotebookSection = ({ section, requestDarken }) => {
   };
 
   return (
-    <View style={{ width: "100%" }}>
+    <View style={{ width: '100%' }}>
       <View style={styles.container}>
         <Pressable
           onPress={() => {
-            navigation.navigate("SectionNotes", {
-              sectionId: section.id,
-              sectionName: section.name,
+            navigation.navigate('SectionNotes', {
+              sectionId: section?.id,
+              sectionName: section?.name,
             });
           }}
           style={{
-            flexDirection: "row",
-            alignContent: "center",
-            alignItems: "center",
+            flexDirection: 'row',
+            alignContent: 'center',
+            alignItems: 'center',
             flex: 1,
           }}
         >
           <MaterialIcons
-            name={"folder"}
+            name={'folder'}
             size={28}
             color={Dark.secondary}
             style={{ paddingHorizontal: 15 }}
           />
           {rename ? (
-            <TextInput
-              maxLength={20}
-              keyboardAppearance={"dark"}
-              ref={inputRef}
-              enterKeyHint={"done"}
-              returnKeyLabel={"done"}
-              returnKeyType={"done"}
-              value={sectionName}
-              onChangeText={setSectionName}
-              onBlur={() => {
-                setRename(false);
-                setSectionName(section.name);
-              }}
-              onSubmitEditing={() => handleRenameSection()}
-              style={[styles.text, { flex: 1, lineHeight: 23 }]}
-            ></TextInput>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+              <TextInput
+                maxLength={20}
+                keyboardAppearance={'dark'}
+                ref={inputRef}
+                enterKeyHint={'done'}
+                returnKeyLabel={'done'}
+                returnKeyType={'done'}
+                value={sectionName}
+                onChangeText={setSectionName}
+                onBlur={() => {
+                  setSectionName(section?.name);
+                  setRename(false);
+                }}
+                onSubmitEditing={() => handleRenameSection()}
+                style={[styles.text, { flex: 1, lineHeight: 23 }]}
+              ></TextInput>
+            </GestureHandlerRootView>
           ) : (
-            <Text style={styles.text}>{sectionName}</Text>
+            <Text style={styles.text}>{section?.name}</Text>
           )}
         </Pressable>
         <Pressable
@@ -119,7 +123,7 @@ const NotebookSection = ({ section, requestDarken }) => {
             setShowOptionModal(!showOptionModal);
           }}
         >
-          <MaterialIcons name={"more-horiz"} size={22} color={Dark.secondary} />
+          <MaterialIcons name={'more-horiz'} size={22} color={Dark.secondary} />
         </Pressable>
       </View>
       {/* Section Options Modal */}
@@ -134,20 +138,20 @@ const NotebookSection = ({ section, requestDarken }) => {
               styles.optionsContainer,
               {
                 marginBottom: 0,
-                flexDirection: "row",
-                alignItems: "center",
+                flexDirection: 'row',
+                alignItems: 'center',
                 padding: 15,
                 height: 60,
               },
             ]}
           >
             <MaterialIcons
-              name={"folder-open"}
+              name={'folder-open'}
               size={24}
               color={Dark.primary}
             />
             <Text style={[styles.text, { marginLeft: 15, fontSize: 20 }]}>
-              {section.name}
+              {section?.name}
             </Text>
           </View>
 
@@ -160,14 +164,14 @@ const NotebookSection = ({ section, requestDarken }) => {
                 focusInput();
               }}
             >
-              <MaterialIcons name={"edit"} size={20} color={Dark.primary} />
+              <MaterialIcons name={'edit'} size={20} color={Dark.primary} />
               <Text style={[styles.text, { marginLeft: 15 }]}>Rename</Text>
             </Pressable>
             <Pressable
               style={styles.optionButton}
               onPress={() => handleRemoveSection()}
             >
-              <MaterialIcons name={"delete"} size={20} color={Dark.alert} />
+              <MaterialIcons name={'delete'} size={20} color={Dark.alert} />
               <Text
                 style={[
                   styles.text,
@@ -189,29 +193,29 @@ const NotebookSection = ({ section, requestDarken }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 15,
     gap: 5,
-    justifyContent: "space-around",
-    alignContent: "center",
-    alignItems: "center",
-    width: "90%",
+    justifyContent: 'space-around',
+    alignContent: 'center',
+    alignItems: 'center',
+    width: '90%',
   },
   optionsContainer: {
-    backgroundColor: "#242424",
+    backgroundColor: '#242424',
     borderRadius: 15,
-    flexDirection: "column",
+    flexDirection: 'column',
     margin: 25,
     height: 120,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   optionButton: {
     borderBottomWidth: 3,
     borderBottomColor: Dark.tertiary,
     padding: 15,
     flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   optionsModal: {
     flex: 2,
@@ -219,9 +223,9 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.tertiary,
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 16,
     lineHeight: 30,
     color: Dark.primary,

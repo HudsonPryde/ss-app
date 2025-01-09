@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,28 +9,24 @@ import {
   Modal,
   ActivityIndicator,
   TouchableOpacity,
-} from "react-native";
+  Platform,
+} from 'react-native';
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   interpolate,
   withTiming,
   withRepeat,
-} from "react-native-reanimated";
-import env from "../env";
-import { Audio } from "expo-av";
-import Voice from "@react-native-voice/voice";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Dark, Notebook } from "../lib/Theme";
-import { MaterialIcons } from "@expo/vector-icons";
-import {
-  useInterstitialAd,
-  TestIds,
-  AdsConsent,
-} from "react-native-google-mobile-ads";
-import { ProgressBar, Snackbar } from "react-native-paper";
+} from 'react-native-reanimated';
+import env from '../env';
+import { Audio } from 'expo-av';
+import Voice from '@react-native-voice/voice';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dark, Notebook } from '../lib/Theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { ProgressBar, Snackbar } from 'react-native-paper';
 
-const screenHeight = Dimensions.get("screen").height;
+const screenHeight = Dimensions.get('screen').height;
 
 const AudioScreen = ({ navigation, route }) => {
   const { initText } = route.params;
@@ -38,43 +34,12 @@ const AudioScreen = ({ navigation, route }) => {
   const [permission, requestPermission] = Audio.usePermissions();
   const [currentResults, setCurrentResults] = useState([]);
   const [totalResults, setTotalResults] = useState([]);
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
 
   const scale = useSharedValue(0);
   const wave = useSharedValue(0);
-
-  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
-  const adUnitId =
-    Platform.OS === "ios"
-      ? env.APPLE_AUDIO_AD_UNIT_ID
-      : env.ANDROID_AUDIO_AD_UNIT_ID;
-
-  useEffect(() => {
-    async function getConsent() {
-      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
-      return selectPersonalisedAds;
-    }
-    getConsent().then((res) => {
-      setSelectPersonalisedAds(res);
-    });
-  }, []);
-
-  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
-    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
-  });
-
-  useEffect(() => {
-    Ad.load();
-  }, [Ad.load]);
-
-  useEffect(() => {
-    if (Ad.isClosed) {
-      // Action after the ad is closed
-      handleCreateNotes();
-    }
-  }, [Ad.isClosed, Ad.navigation]);
 
   // set initial text if it exists
   useEffect(() => {
@@ -87,7 +52,7 @@ const AudioScreen = ({ navigation, route }) => {
   useEffect(() => {
     const voiceControl = async () => {
       if (isRecording) {
-        await Voice.start("en-US");
+        await Voice.start('en-US');
       } else {
         // add curr res to all res when recording stops
         setTotalResults([...totalResults, ...currentResults]);
@@ -126,11 +91,11 @@ const AudioScreen = ({ navigation, route }) => {
   }, [isRecording]);
 
   useEffect(() => {
-    let displayText = "";
+    let displayText = '';
     if (totalResults.length > 0) {
-      displayText = totalResults.join("\n\n") + "\n\n";
+      displayText = totalResults.join('\n\n') + '\n\n';
     }
-    displayText += currentResults.join(" ");
+    displayText += currentResults.join(' ');
     // truncate text to 4000 characters
     const truncatedText = displayText.slice(0, 4000);
     setText(truncatedText);
@@ -149,7 +114,7 @@ const AudioScreen = ({ navigation, route }) => {
   }, [isRecording, text]);
 
   const handleEdit = () => {
-    navigation.navigate("TextEdit", {
+    navigation.navigate('TextEdit', {
       initText: text,
     });
   };
@@ -167,7 +132,7 @@ const AudioScreen = ({ navigation, route }) => {
         };
       });
       setLoading(false);
-      navigation.navigate("Notes", {
+      navigation.navigate('Notes', {
         notes: formattedNotes,
       });
     } catch (error) {
@@ -201,8 +166,8 @@ const AudioScreen = ({ navigation, route }) => {
       <View
         style={{
           flex: 1,
-          justifyContent: "center",
-          flexDirection: "column",
+          justifyContent: 'center',
+          flexDirection: 'column',
           backgroundColor: Dark.tertiary,
           padding: 15,
         }}
@@ -210,8 +175,8 @@ const AudioScreen = ({ navigation, route }) => {
         <Text
           style={{
             color: Dark.primary,
-            textAlign: "center",
-            fontFamily: "inter",
+            textAlign: 'center',
+            fontFamily: 'inter',
             fontSize: 18,
           }}
         >
@@ -224,12 +189,12 @@ const AudioScreen = ({ navigation, route }) => {
             backgroundColor: Dark.info,
             width: 200,
             height: 50,
-            alignSelf: "center",
+            alignSelf: 'center',
             marginTop: 15,
           }}
           onPress={requestPermission}
         >
-          <Text style={{ color: Dark.tertiary, textAlign: "center" }}>
+          <Text style={{ color: Dark.tertiary, textAlign: 'center' }}>
             Grant permission
           </Text>
         </TouchableOpacity>
@@ -238,7 +203,7 @@ const AudioScreen = ({ navigation, route }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "right", "left"]}>
+    <SafeAreaView style={styles.container} edges={['top', 'right', 'left']}>
       <Animated.View style={styles.micContainer} opacity={loading ? 0.5 : 1}>
         <Pressable
           style={styles.micButton}
@@ -251,20 +216,20 @@ const AudioScreen = ({ navigation, route }) => {
             <Animated.View
               style={[
                 {
-                  position: "absolute",
+                  position: 'absolute',
                   height: 100,
                   width: 100,
                   borderRadius: 100,
-                  backgroundColor: "#6A4195",
+                  backgroundColor: '#6A4195',
                 },
                 micBorderWaveStyle,
               ]}
             ></Animated.View>
           )}
           <MaterialIcons
-            name={isRecording ? "mic" : "mic-off"}
+            name={isRecording ? 'mic' : 'mic-off'}
             size={65}
-            color={"white"}
+            color={'white'}
           />
         </Pressable>
       </Animated.View>
@@ -272,7 +237,7 @@ const AudioScreen = ({ navigation, route }) => {
         style={[
           {
             backgroundColor: Dark.tertiary,
-            width: "100%",
+            width: '100%',
             borderTopStartRadius: 15,
             borderTopEndRadius: 15,
           },
@@ -288,7 +253,7 @@ const AudioScreen = ({ navigation, route }) => {
             onPress={() => {
               setCurrentResults([]);
               setTotalResults([]);
-              setText("");
+              setText('');
             }}
           >
             <Text
@@ -307,7 +272,7 @@ const AudioScreen = ({ navigation, route }) => {
           </Pressable>
         </View>
         <ScrollView
-          style={{ flex: 1, width: "100%" }}
+          style={{ flex: 1, width: '100%' }}
           contentContainerStyle={{ padding: 20 }}
           bounces={false}
         >
@@ -328,9 +293,9 @@ const AudioScreen = ({ navigation, route }) => {
                 {
                   fontSize: 16,
                   lineHeight: 22,
-                  textAlignVertical: "center",
+                  textAlignVertical: 'center',
                   color: Dark.secondary,
-                  fontFamily: "Poppins",
+                  fontFamily: 'Poppins',
                 },
               ]}
             >
@@ -353,9 +318,9 @@ const AudioScreen = ({ navigation, route }) => {
                 {
                   fontSize: 16,
                   lineHeight: 22,
-                  textAlignVertical: "center",
+                  textAlignVertical: 'center',
                   color: Dark.secondary,
-                  fontFamily: "Poppins",
+                  fontFamily: 'Poppins',
                   width: 100,
                 },
               ]}
@@ -373,7 +338,7 @@ const AudioScreen = ({ navigation, route }) => {
             <Text
               style={[
                 styles.text,
-                { color: Dark.primary, textAlign: "center" },
+                { color: Dark.primary, textAlign: 'center' },
               ]}
             >
               One moment generating notes...
@@ -403,8 +368,8 @@ const AudioScreen = ({ navigation, route }) => {
         <Text
           style={{
             color: Dark.tertiary,
-            textAlign: "center",
-            fontFamily: "inter",
+            textAlign: 'center',
+            fontFamily: 'inter',
             fontSize: 18,
           }}
         >
@@ -419,38 +384,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 20,
     lineHeight: 30,
     color: Dark.primary,
   },
   micContainer: {
     flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   micButton: {
     width: 100,
     height: 100,
     borderRadius: 50,
     backgroundColor: Notebook.grape,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     zIndex: 10,
     elevation: 10,
   },
   bottomButtons: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 10,
     paddingHorizontal: 25,
   },
@@ -459,32 +424,32 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 25,
     width: 75,
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   createButton: {
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 25,
     width: 125,
-    justifyContent: "space-between",
-    flexDirection: "row",
-    alignItems: "center",
+    justifyContent: 'space-between',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   clearButton: {
     backgroundColor: Dark.secondary,
     height: 25,
     width: 75,
     borderRadius: 100,
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
   topRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 15,
   },
   loadingBox: {
@@ -492,9 +457,9 @@ const styles = StyleSheet.create({
     width: 250,
     backgroundColor: Dark.tertiary,
     borderRadius: 15,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

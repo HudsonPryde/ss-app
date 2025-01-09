@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Dark, Notebook } from "../../lib/Theme";
+import React, { useState, useRef, useEffect } from 'react';
+import { Dark, Notebook } from '../../lib/Theme';
 import {
   StyleSheet,
   Text,
@@ -10,17 +10,18 @@ import {
   Pressable,
   LayoutAnimation,
   UIManager,
-} from "react-native";
-import MaterialCommunityIcon from "react-native-vector-icons/MaterialCommunityIcons";
-import { removeStudySet, updateStudySet } from "../../dao/studySets";
+  Platform,
+} from 'react-native';
+import MaterialCommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { removeStudySet, updateStudySet } from '../../dao/studySets';
 // import ConfirmModal from "./ConfirmModal";
 import {
   useNotebooks,
   useNotebooksDispatch,
-} from "../../provider/NotebookProvider";
+} from '../../provider/NotebookProvider';
 
 if (
-  Platform.OS === "android" &&
+  Platform.OS === 'android' &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -43,7 +44,7 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
     try {
       await removeStudySet(id);
       setConfirmDelete(!confirmDelete);
-      dispatch({ type: "removed", id });
+      dispatch({ type: 'removed', id });
       requestClose();
     } catch (error) {
       console.log(error);
@@ -62,7 +63,7 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
       }
       const { name, colour, id } = notebookOptions;
       updateStudySet(id, { name: name, colour: colour });
-      dispatch({ type: "updated", notebook: notebookOptions });
+      dispatch({ type: 'updated', notebook: notebookOptions });
       requestClose();
     } catch (error) {
       console.log(error);
@@ -85,11 +86,11 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
 
       <View style={[styles.optionsModal]}>
         <Pressable
-          style={{ margin: 15, marginLeft: "auto", marginBottom: 0 }}
+          style={{ margin: 15, marginLeft: 'auto', marginBottom: 0 }}
           hitSlop={30}
         >
           <MaterialCommunityIcon
-            name={"close-circle"}
+            name={'close-circle'}
             size={24}
             color={Dark.secondary}
             onPress={() => handleUpdateNotebook()}
@@ -101,15 +102,15 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
             styles.optionsContainer,
             {
               marginBottom: 0,
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection: 'row',
+              alignItems: 'center',
               padding: 15,
               height: 60,
             },
           ]}
         >
           <MaterialCommunityIcon
-            name={"book-variant"}
+            name={'book-variant'}
             size={24}
             color={notebookOptions ? notebookOptions.colour : Dark.primary}
           ></MaterialCommunityIcon>
@@ -135,10 +136,10 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
             value={notebookOptions ? notebookOptions.name : null}
           />
           <MaterialCommunityIcon
-            name={"pencil-outline"}
+            name={'pencil-outline'}
             size={24}
             color={Dark.primary}
-            style={{ marginLeft: "auto" }}
+            style={{ marginLeft: 'auto' }}
           ></MaterialCommunityIcon>
         </Pressable>
 
@@ -154,8 +155,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.grape
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -181,8 +182,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.cerulean
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -215,8 +216,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.ebony
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -236,8 +237,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.orange
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -263,8 +264,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.emerald
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -290,8 +291,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               name={
                 notebookOptions
                   ? notebookOptions.colour === Notebook.red
-                    ? "circle-slice-8"
-                    : "circle-outline"
+                    ? 'circle-slice-8'
+                    : 'circle-outline'
                   : null
               }
               size={24}
@@ -314,11 +315,11 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
           style={[
             styles.optionsContainer,
             {
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: confirmDelete ? "center" : "flex-start",
+              flexDirection: 'row',
+              alignItems: 'center',
+              justifyContent: confirmDelete ? 'center' : 'flex-start',
               height: confirmDelete ? 100 : 50,
-              marginTop: "auto",
+              marginTop: 'auto',
               marginBottom: 45,
             },
           ]}
@@ -332,14 +333,14 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
             }}
             disabled={confirmDelete}
             style={{
-              flexDirection: "row",
-              alignItems: "center",
+              flexDirection: 'row',
+              alignItems: 'center',
               padding: 15,
-              width: confirmDelete ? "auto" : "100%",
+              width: confirmDelete ? 'auto' : '100%',
             }}
           >
             <MaterialCommunityIcon
-              name={"trash-can-outline"}
+              name={'trash-can-outline'}
               size={22}
               color={Dark.alert}
             ></MaterialCommunityIcon>
@@ -350,19 +351,19 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
                   color: Dark.alert,
                   marginLeft: 15,
                   lineHeight: 22,
-                  fontFamily: "PoppinsMedium",
+                  fontFamily: 'PoppinsMedium',
                   fontSize: 18,
                 },
               ]}
             >
-              {confirmDelete ? "Are you sure?" : "Delete"}
+              {confirmDelete ? 'Are you sure?' : 'Delete'}
             </Text>
           </Pressable>
           {confirmDelete ? (
             <View
               style={{
-                width: "100%",
-                flexDirection: "row",
+                width: '100%',
+                flexDirection: 'row',
                 borderTopColor: Dark.tertiary,
                 borderTopWidth: 3,
               }}
@@ -372,8 +373,8 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
                   styles.optionButton,
                   {
                     height: 50,
-                    width: "50%",
-                    justifyContent: "center",
+                    width: '50%',
+                    justifyContent: 'center',
                     borderRightWidth: 3,
                     borderRightColor: Dark.tertiary,
                   },
@@ -400,7 +401,7 @@ const NotebookOptions = ({ id, requestClose, showModal }) => {
               <Pressable
                 style={[
                   styles.optionButton,
-                  { height: 50, width: "50%", justifyContent: "center" },
+                  { height: 50, width: '50%', justifyContent: 'center' },
                 ]}
                 onPress={() => handleDeleteNotebook()}
               >
@@ -429,21 +430,21 @@ const styles = StyleSheet.create({
   optionsContainer: {
     backgroundColor: Dark.quatrenary,
     borderRadius: 15,
-    flexDirection: "column",
-    flexWrap: "wrap",
-    justifyContent: "center",
+    flexDirection: 'column',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
     margin: 25,
     height: 175,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
   optionButton: {
     borderBottomWidth: 3,
     borderBottomColor: Dark.tertiary,
     padding: 15,
-    height: "33%",
-    width: "50%",
-    flexDirection: "row",
-    alignItems: "center",
+    height: '33%',
+    width: '50%',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   optionsModal: {
     flex: 2,
@@ -451,9 +452,9 @@ const styles = StyleSheet.create({
     backgroundColor: Dark.tertiary,
   },
   optionsText: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 14,
     lineHeight: 30,
     color: Dark.primary,

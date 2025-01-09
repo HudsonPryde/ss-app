@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext } from 'react';
 import {
   Alert,
   StyleSheet,
@@ -7,27 +7,25 @@ import {
   Text,
   TextInput,
   Image,
-} from "react-native";
-import { supabase } from "../lib/initSupabase";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Dark } from "../lib/Theme";
-import * as Google from "expo-auth-session/providers/google";
+} from 'react-native';
+import { supabase } from '../lib/initSupabase';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dark } from '../lib/Theme';
+import * as Google from 'expo-auth-session/providers/google';
 // check if apple sign in is available
-import * as AppleAuthentication from "expo-apple-authentication";
-
-import env from "../env";
+import * as AppleAuthentication from 'expo-apple-authentication';
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const [req, _res, promptAsync] = Google.useAuthRequest({
     selectAccount: true,
     shouldAutoExchangeCode: false,
-    expoClientId: "",
-    iosClientId: "",
-    androidClientId: "",
+    expoClientId: '',
+    iosClientId: '',
+    androidClientId: '',
   });
 
   const signInWithEmail = async () => {
@@ -45,7 +43,7 @@ const LoginScreen = ({ navigation }) => {
   const signInWithGoogle = async () => {
     try {
       let res = await promptAsync({
-        url: `${env.SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${req?.redirectUri}&prompt=select_account`,
+        url: `${process.env.EXPO_PUBLIC_SUPABASE_URL}/auth/v1/authorize?provider=google&redirect_to=${req?.redirectUri}&prompt=select_account`,
       });
       // After we got refresh token with the response, we can send it to supabase to sign-in the user
       const { data, error } = await supabase.auth.refreshSession({
@@ -64,9 +62,8 @@ const LoginScreen = ({ navigation }) => {
           AppleAuthentication.AppleAuthenticationScope.EMAIL,
         ],
       });
-      // console.log(credential);
       const { data, error } = await supabase.auth.signInWithIdToken({
-        provider: "apple",
+        provider: 'apple',
         token: credential.identityToken,
       });
     } catch (error) {
@@ -79,10 +76,10 @@ const LoginScreen = ({ navigation }) => {
       <View style={styles.row}>
         <TouchableOpacity
           onPress={signInWithGoogle}
-          style={[styles.button, { backgroundColor: "white" }]}
+          style={[styles.button, { backgroundColor: 'white' }]}
         >
           <Image
-            source={require("../assets/icons/google-logo.png")}
+            source={require('../assets/icons/google-logo.png')}
             style={{
               width: 16,
               height: 16,
@@ -94,7 +91,7 @@ const LoginScreen = ({ navigation }) => {
               styles.text,
               {
                 color: Dark.background,
-                fontFamily: "InterSemiBold",
+                fontFamily: 'InterSemiBold',
                 letterSpacing: 0,
               },
             ]}
@@ -113,7 +110,7 @@ const LoginScreen = ({ navigation }) => {
               AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
             }
             cornerRadius={5}
-            style={[styles.button, { backgroundColor: "transparent" }]}
+            style={[styles.button, { backgroundColor: 'transparent' }]}
             onPress={signInWithApple}
           />
         </View>
@@ -139,10 +136,10 @@ const LoginScreen = ({ navigation }) => {
         onChangeText={(text) => setPassword(text)}
       />
       <TouchableOpacity
-        style={[styles.button, { backgroundColor: "#4286f4" }]}
+        style={[styles.button, { backgroundColor: '#4286f4' }]}
         onPress={signInWithEmail}
       >
-        <Text style={[styles.text, { color: "white" }]}>
+        <Text style={[styles.text, { color: 'white' }]}>
           Continue with Email
         </Text>
       </TouchableOpacity>
@@ -153,16 +150,16 @@ const LoginScreen = ({ navigation }) => {
             {
               fontSize: 14,
               lineHeight: 23,
-              fontFamily: "PoppinsRegular",
+              fontFamily: 'PoppinsRegular',
               color: Dark.secondary,
             },
           ]}
         >
-          Don't have an account?{" "}
+          Don't have an account?{' '}
         </Text>
         <TouchableOpacity
           onPress={() => {
-            navigation.navigate("Signup");
+            navigation.navigate('Signup');
           }}
         >
           <Text
@@ -171,7 +168,7 @@ const LoginScreen = ({ navigation }) => {
               {
                 fontSize: 14,
                 lineHeight: 23,
-                fontFamily: "PoppinsRegular",
+                fontFamily: 'PoppinsRegular',
                 color: Dark.info,
               },
             ]}
@@ -188,33 +185,33 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.tertiary,
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    flexDirection: "column",
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    flexDirection: 'column',
     paddingVertical: 20,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    width: "100%",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 14,
     borderBottomWidth: 2,
-    width: "100%",
-    borderBottomColor: "#212121",
+    width: '100%',
+    borderBottomColor: '#212121',
   },
   loginBox: {
     backgroundColor: Dark.quatrenary,
-    width: "75%",
-    height: "50%",
-    alignSelf: "center",
+    width: '75%',
+    height: '50%',
+    alignSelf: 'center',
     marginVertical: 25,
     borderRadius: 10,
 
-    justifyContent: "flex-start",
+    justifyContent: 'flex-start',
   },
   loginInput: {
     backgroundColor: Dark.background,
@@ -224,28 +221,28 @@ const styles = StyleSheet.create({
     padding: 10,
     fontSize: 18,
     borderWidth: 1,
-    width: "90%",
+    width: '90%',
     borderColor: Dark.quatrenary,
-    alignSelf: "center",
-    fontFamily: "Inter",
+    alignSelf: 'center',
+    fontFamily: 'Inter',
   },
   text: {
-    fontFamily: "InterSemiBold",
+    fontFamily: 'InterSemiBold',
     fontSize: 16,
     lineHeight: 22,
     color: Dark.primary,
   },
 
   button: {
-    alignSelf: "center",
+    alignSelf: 'center',
     borderRadius: 5,
-    width: "90%",
+    width: '90%',
     height: 44,
     marginVertical: 10,
-    alignContent: "center",
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
+    alignContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'center',
   },
 });
 

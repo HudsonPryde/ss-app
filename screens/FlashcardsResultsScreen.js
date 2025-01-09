@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { StyleSheet, View, Text, Pressable } from "react-native";
-import { Dark } from "../lib/Theme";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Animated, { BounceIn } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { StackActions } from "@react-navigation/native";
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, View, Text, Pressable } from 'react-native';
+import { Dark } from '../lib/Theme';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Animated, { BounceIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StackActions } from '@react-navigation/native';
 
 const FlashcardsResultsScreen = ({ navigation, route }) => {
   const { notebook, totalCards, incorrectCards } = route.params;
@@ -45,7 +45,7 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
 
   return (
     <SafeAreaView style={[styles.container]}>
-      <Animated.View entering={BounceIn}>
+      <Animated.View entering={BounceIn} style={{ width: 100, height: 100 }}>
         <MaterialIcons name="check-circle" size={100} color={notebookColour} />
       </Animated.View>
       <View style={styles.resultContainer}>{scoreText()}</View>
@@ -58,11 +58,11 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
           ]}
           onPress={() => {
             navigation.dispatch({
-              ...StackActions.replace("Flashcards", {
+              ...StackActions.replace('Flashcards', {
                 flashcards: allCards,
                 notebook: notebook,
               }),
-              source: "FlashcardsResults",
+              source: 'FlashcardsResults',
             });
           }}
         >
@@ -74,11 +74,11 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
           style={styles.button}
           onPress={() => {
             navigation.dispatch({
-              ...StackActions.replace("Flashcards", {
+              ...StackActions.replace('Flashcards', {
                 flashcards: missedCards,
                 notebook: notebook,
               }),
-              source: "FlashcardsResults",
+              source: 'FlashcardsResults',
             });
           }}
         >
@@ -89,7 +89,7 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
       <View style={styles.buttonContainer}>
         <Pressable
           style={styles.button}
-          onPress={() => navigation.navigate("Notebook", { id: notebook.id })}
+          onPress={() => navigation.navigate('Notebook', { id: notebook.id })}
         >
           <Text style={[styles.text]}>Return to notebook</Text>
         </Pressable>
@@ -101,49 +101,50 @@ const FlashcardsResultsScreen = ({ navigation, route }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: Dark.background,
   },
   resultContainer: {
     marginVertical: 35,
-    alignItems: "center",
-    textAlign: "center",
-    width: "80%",
+    alignItems: 'center',
+    textAlign: 'center',
+    width: '80%',
   },
   buttonContainer: {
-    flexDirection: "column",
-    width: "80%",
+    flexDirection: 'column',
+    width: '80%',
     borderRadius: 15,
     marginVertical: 15,
-    overflow: "hidden",
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: Dark.quatrenary,
   },
   button: {
     backgroundColor: Dark.tertiary,
     height: 50,
-    width: "100%",
-    alignContent: "center",
-    justifyContent: "center",
-    alignItems: "center",
+    width: '100%',
+    alignContent: 'center',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   resultText: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 24,
     lineHeight: 30,
     color: Dark.primary,
-    textAlign: "center",
+    textAlign: 'center',
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 18,
     lineHeight: 30,
     color: Dark.primary,
-    textAlign: "center",
+    textAlign: 'center',
   },
 });
 
