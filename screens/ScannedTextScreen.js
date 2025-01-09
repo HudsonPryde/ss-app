@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -9,64 +9,30 @@ import {
   Text,
   TouchableOpacity,
   Modal,
-} from "react-native";
-import env from "../env";
-import { Dark } from "../lib/Theme";
-import { MaterialIcons } from "@expo/vector-icons";
-import { createNotes } from "../lib/api/textProcess";
-import { ProgressBar, Snackbar } from "react-native-paper";
-import {
-  useInterstitialAd,
-  TestIds,
-  AdsConsent,
-} from "react-native-google-mobile-ads";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { useScan, useScanDispatch } from "../provider/ScanProvider";
+} from 'react-native';
+import env from '../env';
+import { Dark } from '../lib/Theme';
+import { MaterialIcons } from '@expo/vector-icons';
+import { createNotes } from '../lib/api/textProcess';
+import { ProgressBar, Snackbar } from 'react-native-paper';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useScan, useScanDispatch } from '../provider/ScanProvider';
 
 // const { selectBasicAds } = await AdsConsent.getUserChoices();
 
 const ScannedTextScreen = ({ navigation }) => {
   const scan = useScan();
   const dispatch = useScanDispatch();
-  const [text, setText] = useState("");
+  const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
   const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
-  const adUnitId =
-    Platform.OS === "ios"
-      ? env.APPLE_CAMERA_AD_UNIT_ID
-      : env.ANDROID_CAMERA_AD_UNIT_ID;
-
-  useEffect(() => {
-    async function getConsent() {
-      const { selectPersonalisedAds } = await AdsConsent.getUserChoices();
-      return selectPersonalisedAds;
-    }
-    getConsent().then((res) => {
-      setSelectPersonalisedAds(res);
-    });
-  }, []);
-
-  const Ad = useInterstitialAd(__DEV__ ? TestIds.INTERSTITIAL : adUnitId, {
-    requestNonPersonalizedAdsOnly: selectPersonalisedAds,
-  });
 
   useEffect(() => {
     if (scan) {
       setText(scan);
     }
   }, [scan]);
-
-  useEffect(() => {
-    Ad.load();
-  }, [Ad.load, apiError]);
-
-  useEffect(() => {
-    if (Ad.isClosed) {
-      // Action after the ad is closed
-      handleCreateNotes();
-    }
-  }, [Ad.isClosed, Ad.navigation]);
 
   async function handleCreateNotes() {
     try {
@@ -79,10 +45,10 @@ const ScannedTextScreen = ({ navigation }) => {
           text: note,
         };
       });
-      dispatch({ type: "cleared" });
+      dispatch({ type: 'cleared' });
       setLoading(false);
       navigation.goBack();
-      navigation.navigate("CameraNotes", {
+      navigation.navigate('CameraNotes', {
         notes: formattedNotes,
       });
     } catch (error) {
@@ -105,12 +71,12 @@ const ScannedTextScreen = ({ navigation }) => {
         <TouchableOpacity
           style={styles.pillConatiner}
           onPress={() => {
-            dispatch({ type: "cleared" });
-            navigation.navigate("Camera");
+            dispatch({ type: 'cleared' });
+            navigation.navigate('Camera');
           }}
         >
           <MaterialIcons
-            name={"close"}
+            name={'close'}
             size={20}
             style={{ color: Dark.primary }}
           />
@@ -127,35 +93,30 @@ const ScannedTextScreen = ({ navigation }) => {
     <SafeAreaView
       style={styles.container}
       edges={
-        Platform.OS === "ios"
-          ? ["left", "right", "bottom"]
-          : ["left", "right", "bottom", "top"]
+        Platform.OS === 'ios'
+          ? ['left', 'right', 'bottom']
+          : ['left', 'right', 'bottom', 'top']
       }
     >
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => {
-            dispatch({ type: "edited", scan: text });
-            navigation.navigate("Camera");
+            dispatch({ type: 'edited', scan: text });
+            navigation.navigate('Camera');
           }}
         >
           <Text style={[styles.text, { color: Dark.primary }]}>Save</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            // navigation.goBack();
-            if (Ad.isLoaded) {
-              Ad.show();
-            } else {
-              handleCreateNotes();
-            }
+            handleCreateNotes();
           }}
         >
           <Text style={[styles.text, { color: Dark.info }]}>Make notes</Text>
         </TouchableOpacity>
       </View>
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.scrollContainer}
       >
         <ScrollView
@@ -184,7 +145,7 @@ const ScannedTextScreen = ({ navigation }) => {
             <Text
               style={[
                 styles.text,
-                { color: Dark.primary, textAlign: "center" },
+                { color: Dark.primary, textAlign: 'center' },
               ]}
             >
               One moment generating notes...
@@ -214,8 +175,8 @@ const ScannedTextScreen = ({ navigation }) => {
         <Text
           style={{
             color: Dark.tertiary,
-            textAlign: "center",
-            fontFamily: "inter",
+            textAlign: 'center',
+            fontFamily: 'inter',
             fontSize: 18,
           }}
         >
@@ -230,68 +191,68 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Dark.background,
-    alignItems: "flex-start",
-    justifyContent: "flex-start",
-    flexDirection: "column",
+    alignItems: 'flex-start',
+    justifyContent: 'flex-start',
+    flexDirection: 'column',
   },
   pillConatiner: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 25,
     backgroundColor: Dark.tertiary,
     paddingVertical: 5,
     paddingHorizontal: 15,
-    alignSelf: "flex-end",
+    alignSelf: 'flex-end',
     marginHorizontal: 10,
   },
   textInput: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 20,
     lineHeight: 30,
     color: Dark.primary,
     padding: 20,
     paddingBottom: 100,
-    width: "100%",
+    width: '100%',
   },
   header: {
-    flexDirection: "row",
+    flexDirection: 'row',
     paddingVertical: 14,
     paddingHorizontal: 20,
     borderBottomWidth: 2,
-    width: "100%",
+    width: '100%',
     borderBottomColor: Dark.tertiary,
-    justifyContent: "space-between",
+    justifyContent: 'space-between',
   },
   text: {
-    fontFamily: "PoppinsRegular",
-    fontStyle: "normal",
-    fontWeight: "600",
+    fontFamily: 'PoppinsRegular',
+    fontStyle: 'normal',
+    fontWeight: '600',
     fontSize: 16,
     lineHeight: 30,
     color: Dark.primary,
   },
   scrollContainer: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
   },
   loadingBox: {
     height: 150,
     width: 250,
     backgroundColor: Dark.tertiary,
     borderRadius: 15,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     flex: 1,
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
-    flexDirection: "column",
+    backgroundColor: 'transparent',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'column',
   },
 });
 

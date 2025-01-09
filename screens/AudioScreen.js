@@ -305,11 +305,7 @@ const AudioScreen = ({ navigation, route }) => {
           <Pressable
             style={styles.createButton}
             onPress={() => {
-              if (Ad.isLoaded) {
-                Ad.show();
-              } else {
-                handleCreateNotes();
-              }
+              handleCreateNotes();
             }}
           >
             <Text
