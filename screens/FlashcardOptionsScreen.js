@@ -9,7 +9,6 @@ import {
   Platform,
 } from 'react-native';
 import { Dark } from '../lib/Theme';
-import env from '../env';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import { createFlashcards } from '../lib/api/textProcess';
 import { bulkInsertFlashcards } from '../dao/flashcards';

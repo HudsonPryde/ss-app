@@ -32,12 +32,6 @@
           }
         }
       ],
-      [
-        "expo-tracking-transparency",
-        {
-          "userTrackingPermission": "This identifier will be used to deliver personalized ads to you."
-        }
-      ],
       "expo-font",
       "expo-secure-store"
     ],
@@ -94,9 +88,5 @@
         "projectId": "c50b2d11-714d-4e9c-8470-7f0d5b44b8ec"
       }
     }
-  },
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-8992141010215842~4116132267",
-    "ios_app_id": "ca-app-pub-8992141010215842~1957836819"
   }
 }

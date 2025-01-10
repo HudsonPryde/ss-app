@@ -18,7 +18,6 @@ import Animated, {
   withTiming,
   withRepeat,
 } from 'react-native-reanimated';
-import env from '../env';
 import { Audio } from 'expo-av';
 import Voice from '@react-native-voice/voice';
 import { SafeAreaView } from 'react-native-safe-area-context';

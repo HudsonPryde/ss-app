@@ -10,7 +10,6 @@ import {
   TouchableOpacity,
   Modal,
 } from 'react-native';
-import env from '../env';
 import { Dark } from '../lib/Theme';
 import { MaterialIcons } from '@expo/vector-icons';
 import { createNotes } from '../lib/api/textProcess';
@@ -18,15 +17,12 @@ import { ProgressBar, Snackbar } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useScan, useScanDispatch } from '../provider/ScanProvider';
 
-// const { selectBasicAds } = await AdsConsent.getUserChoices();
-
 const ScannedTextScreen = ({ navigation }) => {
   const scan = useScan();
   const dispatch = useScanDispatch();
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(false);
-  const [selectPersonalisedAds, setSelectPersonalisedAds] = useState(false);
 
   useEffect(() => {
     if (scan) {

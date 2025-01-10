@@ -21,7 +21,6 @@ import DeleteAccountModal from '../components/modals/DeleteAccountModal';
 import { supabase } from '../lib/initSupabase';
 import { AuthContext } from '../provider/AuthProvider';
 import { useNotebooks } from '../provider/NotebookProvider';
-import { requestTrackingPermissionsAsync } from 'expo-tracking-transparency';
 
 if (
   Platform.OS === 'android' &&
@@ -41,12 +40,6 @@ const MainScreen = ({ navigation }) => {
   const [selectedNotebook, setSelectedNotebook] = useState(null);
   const [showUserOptions, setShowUserOptions] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
-
-  // useEffect(() => {
-  //   (async () => {
-  //     await requestTrackingPermissionsAsync();
-  //   })();
-  // }, []);
 
   useEffect(() => {
     if (darken) {
