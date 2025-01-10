@@ -2,7 +2,7 @@
   "expo": {
     "name": "Study Scribe",
     "slug": "ss-app",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "icon": "./assets/ss-icon.png",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
