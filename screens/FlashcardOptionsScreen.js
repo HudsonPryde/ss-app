@@ -28,7 +28,6 @@ const FlashcardOptionsScreen = ({ navigation, route }) => {
   const [sectionNotes, setSectionNotes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [flashcardGenProgress, setFlashcardGenProgress] = useState(0);
-
   useEffect(() => {
     setSectionNotes(
       notes.filter((n) => selectedSections.includes(n.section_id))

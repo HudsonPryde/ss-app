@@ -25,7 +25,7 @@ serve(async (req) => {
       {
         role: 'user',
         content:
-          'Return your response as a parsable JSON object in the following format: { Q: "[question]", A: "[answer]", ... }.',
+          'Return your response as a parsable JSON string in the following format: { Q: "[question]", A: "[answer]", ... }.',
       },
     ],
     model: 'gpt-4o-mini',

@@ -15,13 +15,18 @@ serve(async (req) => {
   const completion = await openai.chat.completions.create({
     messages: [
       {
+        role: 'system',
+        content:
+          'You are a helpful tutor aiding a student by making study materials.',
+      },
+      {
         role: 'user',
         content: `Restructure the following text into study notes for a student: ${text}`,
       },
       {
         role: 'user',
         content:
-          'Return your response as a parsable JSON object in the following format: { 1: "[first note]", 2: "[second note]", ... }.',
+          'Return your response as a parsable JSON string in the following format: { 1: "[first note]", 2: "[second note]", ... }.',
       },
     ],
     model: 'gpt-4o-mini',
@@ -34,7 +39,7 @@ serve(async (req) => {
     content.lastIndexOf('}') + 1
   );
 
-  return new Response(content, {
+  return new Response(JSON.stringify(content), {
     headers: { 'Content-Type': 'application/json' },
   });
 });
